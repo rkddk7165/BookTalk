@@ -18,14 +18,11 @@ public class JoinRequest {
     @NotBlank
     private String nickname;
 
+    @NotBlank
     private String password;
 
     private String profileImage;
 
-    @NotNull
-    private Host host;
-
-    private String snsId;
 
     /**
      *     Entity로 변환 편의 메소드
@@ -36,8 +33,6 @@ public class JoinRequest {
         user.setNickname(this.nickname);
         user.setPassword(this.password);
         user.setProfileImage(this.profileImage);
-        user.setHost(this.host);
-        user.setSnsId(this.snsId);
         return user;
     }
 }
