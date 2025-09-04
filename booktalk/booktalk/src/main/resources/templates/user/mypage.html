@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:http="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>마이 페이지 - BookTalk</title>
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+</head>
+<body>
+<header th:replace="fragments/navbar :: navbar"></header>
+<section class="container">
+    <h2>마이 페이지</h2>
+    <div class="card">
+        <p><strong>이메일:</strong> <span th:text="${user.email}">email</span></p>
+        <p><strong>닉네임:</strong> <span th:text="${user.nickname}">nickname</span></p>
+    </div>
+</section>
+</body>
+</html>

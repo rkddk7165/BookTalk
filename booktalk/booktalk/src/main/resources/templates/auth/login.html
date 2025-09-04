@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>로그인 - BookTalk</title>
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+</head>
+<body>
+<header th:replace="fragments/navbar :: navbar"></header>
+<section class="form-container">
+    <h2>로그인</h2>
+
+    <div class="alert danger" th:if="${error}" th:text="${error}">오류 메시지</div>
+
+    <form th:action="@{/login}" th:object="${loginRequest}" method="post">
+        <input type="hidden" name="redirect" th:value="${redirect}" />
+        <div class="form-field">
+            <label for="email">이메일</label>
+            <input id="email" type="email" th:field="*{email}" placeholder="you@example.com" required>
+            <div class="field-error" th:errors="*{email}">이메일 에러</div>
+        </div>
+        <div class="form-field">
+            <label for="password">비밀번호</label>
+            <input id="password" type="password" th:field="*{password}" placeholder="••••••••" required>
+            <div class="field-error" th:errors="*{password}">비밀번호 에러</div>
+        </div>
+        <div class="actions">
+            <button type="submit" class="btn">로그인</button>
+            <a class="btn outline" th:href="@{/oauth2/kakao}">카카오로 로그인</a>
+        </div>
+    </form>
+</section>
+</body>
+</html>

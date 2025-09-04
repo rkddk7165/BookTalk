@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<body>
+<nav class="navbar" th:fragment="navbar">
+    <a class="brand" th:href="@{/}">BookTalk</a>
+    <div class="spacer"></div>
+    <div class="nav-actions">
+        <span th:if="${loginUser != null}" class="welcome" th:text="'안녕하세요, ' + ${loginUser.nickname} + '님'">안녕하세요</span>
+        <a th:if="${loginUser == null}" th:href="@{/login}" class="btn">로그인</a>
+        <a th:if="${loginUser == null}" th:href="@{/join}" class="btn outline">회원가입</a>
+        <form th:if="${loginUser != null}" th:action="@{/logout}" method="post" style="display:inline">
+            <button type="submit" class="btn">로그아웃</button>
+        </form>
+    </div>
+</nav>
+</body>
+</html>

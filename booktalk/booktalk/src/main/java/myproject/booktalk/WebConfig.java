@@ -28,11 +28,11 @@ public class WebConfig implements WebMvcConfigurer {
                 .order(1)
                 .addPathPatterns("/**")
                 .excludePathPatterns(
-                        "/login",            // ✅ 로그인 요청 허용
+                        "/login",
                         "/login/**",         // 혹시 path variable 있을 경우
                         "/join",
                         "/logout",
-                        "/users", "/users/**", // ← 만약 join이 /users로 들어온다면 이거 필요함
+                        "/users", "/users/**",
                         "/css/**",
                         "/js/**",
                         "/favicon.ico"

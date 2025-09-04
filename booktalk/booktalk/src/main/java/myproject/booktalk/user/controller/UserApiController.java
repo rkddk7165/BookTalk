@@ -1,21 +1,21 @@
-package myproject.booktalk.user;
+package myproject.booktalk.user.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import myproject.booktalk.kakao.KakaoLoginService;
+import myproject.booktalk.user.User;
+import myproject.booktalk.user.UserService;
 import myproject.booktalk.user.dto.*;
 import myproject.booktalk.user.session.SessionConst;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
 @RestController
+@RequestMapping("/api")
 @RequiredArgsConstructor
 public class UserApiController {
 

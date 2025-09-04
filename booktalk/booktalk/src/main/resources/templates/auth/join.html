@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>회원가입 - BookTalk</title>
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+</head>
+<body>
+<header th:replace="fragments/navbar :: navbar"></header>
+<section class="form-container">
+    <h2>회원가입</h2>
+    <form th:action="@{/join}" th:object="${joinRequest}" method="post">
+        <div class="form-field">
+            <label for="email">이메일</label>
+            <input id="email" type="email" th:field="*{email}" required>
+            <div class="field-error" th:errors="*{email}">이메일 에러</div>
+        </div>
+        <div class="form-field">
+            <label for="nickname">닉네임</label>
+            <input id="nickname" type="text" th:field="*{nickname}" required>
+            <div class="field-error" th:errors="*{nickname}">닉네임 에러</div>
+        </div>
+        <div class="form-field">
+            <label for="password">비밀번호</label>
+            <input id="password" type="password" th:field="*{password}" required>
+            <div class="field-error" th:errors="*{password}">비밀번호 에러</div>
+        </div>
+        <div class="actions">
+            <button type="submit" class="btn">가입하기</button>
+            <a class="btn outline" th:href="@{/login}">이미 계정이 있어요</a>
+        </div>
+    </form>
+</section>
+</body>
+</html>
