@@ -9,8 +9,10 @@
 <header th:replace="fragments/navbar :: navbar"></header>
 <section class="hero">
     <h1>북 토크에 오신 것을 환영합니다</h1>
-    <p th:if="${loginUser == null}">로그인 후 게시글을 작성하고 댓글을 남겨보세요.</p>
-    <p th:if="${loginUser != null}" th:text="'반가워요, ' + ${loginUser.nickname} + '님! 오늘은 어떤 책을 이야기할까요?'"></p>
+    <p th:if="${session.loginUser} == null">로그인 후 게시글을 작성하고 댓글을 남겨보세요.</p>
+    <p th:if="${session.loginUser} != null"
+       th:text="'반가워요, ' + ${session.loginUser.nickname} + '님! 오늘은 어떤 책을 이야기할까요?'"></p>
+
 </section>
 </body>
 </html>

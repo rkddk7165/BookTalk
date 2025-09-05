@@ -17,11 +17,10 @@ public class UserService {
      * 회원가입
      */
     public Long join(User user) {
-        User savedUser = userRepository.save(user);
 
-        // 로컬 가입자에 대해 host와 snsId 강제 설정
         user.setHost(Host.LOCAL);
         user.setSnsId(null);
+        User savedUser = userRepository.save(user);
 
         return savedUser.getId();
     }

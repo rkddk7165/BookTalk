@@ -48,12 +48,16 @@ public class AuthViewController {
         log.info(form.getEmail());
         log.info(form.getPassword());
 
-        if (bindingResult.hasErrors()) return "auth/login";
+        if (bindingResult.hasErrors()) {
+            log.info(bindingResult.getAllErrors().toString());
+            return "auth/login";
+        }
 
 
 
         try {
             User user = userService.login(form.getEmail(), form.getPassword());
+            log.info(user.toString());
             HttpSession session = request.getSession();
             session.setAttribute(SessionConst.LOGIN_USER, user);
             return "redirect:" + (StringUtils.hasText(redirect) ? redirect : "/");
@@ -76,10 +80,7 @@ public class AuthViewController {
                        RedirectAttributes ra) {
         if (bindingResult.hasErrors()) return "auth/join";
 
-        User joinUser = new User();
-        joinUser.setEmail(form.getEmail());
-        joinUser.setPassword(form.getPassword());
-        joinUser.setEmail(form.getEmail());
+        User joinUser = form.toEntity();
 
         userService.join(joinUser);
         ra.addAttribute("email", form.getEmail());

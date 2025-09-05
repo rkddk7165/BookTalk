@@ -19,6 +19,15 @@ public class LoginCheckInterceptor implements HandlerInterceptor {
 
         HttpSession session = request.getSession(false);
 
+        // 현재 요청이 로그인/회원가입/정적이면 통과 (이중 안전장치)
+        String uri = request.getRequestURI();
+        if (uri.startsWith("/login") || uri.startsWith("/join") ||
+                uri.startsWith("/css/") || uri.startsWith("/js/") ||
+                uri.startsWith("/images/") || uri.startsWith("/webjars/") ||
+                uri.equals("/favicon.ico")) {
+            return true;
+        }
+
         if (session == null || session.getAttribute(SessionConst.LOGIN_USER) == null) {
             String target = request.getRequestURI();
             String query = request.getQueryString();

@@ -28,14 +28,14 @@ public class WebConfig implements WebMvcConfigurer {
                 .order(1)
                 .addPathPatterns("/**")
                 .excludePathPatterns(
-                        "/login",
-                        "/login/**",         // 혹시 path variable 있을 경우
-                        "/join",
-                        "/logout",
-                        "/users", "/users/**",
-                        "/css/**",
-                        "/js/**",
-                        "/favicon.ico"
+                        // 인증/회원가입/로그아웃/오류
+                        "/login", "/login/**",
+                        "/join", "/logout",
+                        "/oauth2/**", "/login/oauth2/**",
+                        "/error", "/favicon.ico",
+
+                        // 정적 리소스
+                        "/css/**", "/js/**", "/images/**", "/webjars/**"
                 );
     }
 }
