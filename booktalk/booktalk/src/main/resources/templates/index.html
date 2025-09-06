@@ -1,18 +1,72 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <title>BookTalk</title>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>BookTalk 메인</title>
+    <!-- 로그인 페이지와 동일하게 main.css 사용 -->
     <link rel="stylesheet" th:href="@{/css/main.css}">
+    <style>
+        :root { color-scheme: light dark; }
+        body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans KR", sans-serif; }
+        .wrap { max-width: 1120px; margin: 0 auto; padding: 40px 20px; }
+        .row { display:flex; align-items:center; gap:12px; }
+        .title { font-size: 28px; font-weight: 800; }
+        .hello { margin-left:auto; font-size:14px; color:#666; }
+        .subtitle { color:#666; margin: 12px 0 22px; }
+        .grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(240px,1fr)); gap:16px; }
+        .card {
+            display:block; padding:18px; border-radius:14px; text-decoration:none;
+            border:1px solid rgba(0,0,0,.08); background: rgba(255,255,255,.7); backdrop-filter: blur(6px);
+            transition: transform .12s ease, box-shadow .12s ease;
+        }
+        .card h3 {
+            color: #fff;          /* 흰색으로 고정 */
+            font-weight: 700;
+        }
+        .card p {
+            color: #ccc;          /* 부제목은 회색 */
+        }
+        .card {
+            color: inherit;       /* a 태그 색 덮어쓰기 */
+            text-decoration: none;
+        }
+        .card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,.12); }
+        .card h3 { margin:0 0 6px; font-size:18px; }
+        .card p { margin:0; color:#666; font-size:14px; }
+        .book {
+            border:1px dashed rgba(0,0,0,.18);
+            background: linear-gradient(135deg, rgba(66,133,244,.08), rgba(52,168,83,.08));
+        }
+    </style>
 </head>
 <body>
-<header th:replace="fragments/navbar :: navbar"></header>
-<section class="hero">
-    <h1>북 토크에 오신 것을 환영합니다</h1>
-    <p th:if="${session.loginUser} == null">로그인 후 게시글을 작성하고 댓글을 남겨보세요.</p>
-    <p th:if="${session.loginUser} != null"
-       th:text="'반가워요, ' + ${session.loginUser.nickname} + '님! 오늘은 어떤 책을 이야기할까요?'"></p>
 
-</section>
+<!-- 네비게이션: 로그인 페이지와 동일하게 header + th:replace -->
+<header th:replace="fragments/navbar :: navbar"></header>
+
+<div class="wrap">
+    <div class="row">
+        <div class="title">BookTalk</div>
+        <div class="hello" th:if="${loginUser != null}"
+             th:text="|안녕하세요, ${loginUser.nickname} 님|">안녕하세요</div>
+    </div>
+
+    <div class="subtitle">이용 할 게시판을 선택하세요.</div>
+
+    <div class="grid">
+        <!-- 3개 고정 게시판 -->
+        <a th:each="b : ${boards}" th:href="${b.href}" class="card">
+            <h3 th:text="${b.title}">자유게시판</h3>
+            <p>커뮤니티 글 보기 · 글쓰기</p>
+        </a>
+
+        <!-- 도서 게시판: /book/search 로 진입 -->
+        <a th:href="${bookBoard.href}" class="card book">
+            <h3 th:text="${bookBoard.title}">도서 게시판</h3>
+            <p>책을 검색해 해당 책 게시판으로 이동하거나 새로 생성합니다</p>
+        </a>
+    </div>
+</div>
 </body>
 </html>

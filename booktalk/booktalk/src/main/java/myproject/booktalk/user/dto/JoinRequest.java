@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import myproject.booktalk.user.Host;
+import myproject.booktalk.user.Role;
 import myproject.booktalk.user.User;
 
 @Data
@@ -35,6 +36,9 @@ public class JoinRequest {
         user.setNickname(this.nickname);
         user.setPassword(this.password);
         user.setProfileImage(this.profileImage);
+        user.setHost(Host.LOCAL);
+        user.setRole(Role.USER);
+
         return user;
     }
 }

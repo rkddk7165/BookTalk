@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
+
 @Entity
 @Getter @Setter
 public class User {
@@ -28,6 +29,9 @@ public class User {
 
     @Column(name = "sns_id")
     private String snsId;
+
+    @Enumerated(EnumType.STRING)
+    private Role role = Role.USER;
 
     public User(){};
 

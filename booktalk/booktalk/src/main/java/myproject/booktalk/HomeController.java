@@ -1,5 +1,7 @@
 package myproject.booktalk;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import myproject.booktalk.user.User;
 import myproject.booktalk.user.session.SessionConst;
@@ -8,14 +10,39 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.SessionAttribute;
 
+import java.util.List;
+
 @Controller
 @RequiredArgsConstructor
 public class HomeController {
 
-    public String home(@SessionAttribute(name = SessionConst.LOGIN_USER, required = false) User loginUser,
-                       Model model) {
-
+    @GetMapping("/") // 로그인 성공 후 여기로 리다이렉트되도록 설정(시큐리티 사용 시 defaultSuccessUrl("/"))
+    public String home(
+            @SessionAttribute(name = SessionConst.LOGIN_USER, required = false) User loginUser,
+            Model model
+    ) {
         model.addAttribute("loginUser", loginUser);
-        return "index";
+
+        // 미리 만든 3개 게시판
+        List<BoardEntry> boards = List.of(
+                new BoardEntry("free", "자유게시판", "/boards/free"),
+                new BoardEntry("recommend", "책추천게시판", "/boards/recommend"),
+                new BoardEntry("quotes", "한줄글귀게시판", "/boards/quotes")
+        );
+        // 도서 게시판: 검색 진입 전용
+        BoardEntry bookBoard = new BoardEntry("book", "도서 게시판", "/book/search");
+
+        model.addAttribute("boards", boards);
+        model.addAttribute("bookBoard", bookBoard);
+
+        return "index"; // templates/index.html
+    }
+
+    @Getter
+    @AllArgsConstructor
+    public static class BoardEntry {
+        private String key;
+        private String title;
+        private String href;
     }
 }
