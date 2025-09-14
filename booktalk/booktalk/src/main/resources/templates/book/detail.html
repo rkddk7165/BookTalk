@@ -1,0 +1,48 @@
+﻿<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+    <meta charset="UTF-8"/>
+    <title th:text="${book.title} ?: '도서 상세'">도서 상세</title>
+    <style>
+        .page { max-width: 860px; margin: 40px auto; padding: 0 16px; }
+        .title { font-size: 22px; font-weight: 700; }
+        .meta { color:#666; margin-top: 6px; }
+        .actions { margin-top: 20px; display:flex; gap:10px; }
+        .btn { padding: 10px 16px; border-radius: 8px; border:1px solid #ddd; background:#fff; cursor:pointer; }
+        .btn.primary { background:#222; color:#fff; border-color:#222; }
+        .pill { display:inline-block; font-size: 12px; padding: 2px 8px; border-radius: 999px; background:#f3f3f3; color:#333; margin-left: 8px; }
+        .info { margin-top: 12px; color:#0a7; }
+    </style>
+</head>
+<body>
+<div class="page">
+    <div class="title">
+        <span th:text="${book.title} ?: '제목 정보 없음'">제목</span>
+        <span class="pill" th:text="${book.isbn}">ISBN</span>
+    </div>
+
+    <div class="meta">
+        <span th:text="${book.author} ?: '저자 정보 없음'">저자</span>
+        ·
+        <span th:text="${book.publisher} ?: '출판사 정보 없음'">출판사</span>
+        <span th:if="${book.pages != null}"> · <span th:text="${book.pages}">0</span>쪽</span>
+    </div>
+
+    <div class="actions" th:if="${boardExists}">
+        <form th:action="@{|/books/${book.isbn}/go-board|}" method="post">
+            <button class="btn primary" type="submit">책 게시판으로 이동</button>
+        </form>
+    </div>
+
+    <div class="actions" th:if="${!boardExists}">
+        <form th:action="@{|/books/${book.isbn}/request-board|}" method="post">
+            <button class="btn primary" type="submit">게시판 생성 요청</button>
+        </form>
+    </div>
+
+    <div class="info" th:if="${param.requested}">
+        게시판 생성 요청이 접수되었습니다. 관리자가 승인하면 이용할 수 있어요.
+    </div>
+</div>
+</body>
+</html>

@@ -2,6 +2,7 @@ package myproject.booktalk.bookSearch;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import myproject.booktalk.book.Book;
 import myproject.booktalk.bookSearch.dto.BookDto;
 import myproject.booktalk.bookSearch.dto.KakaoBookResponse;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,6 +17,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class BookSearchService {
@@ -95,4 +97,49 @@ public class BookSearchService {
             return List.of();
         }
     }
+
+    /** ISBN-13로 단일 도서 찾기 (Kakao target=isbn 사용) */
+    public Optional<BookDto> findByIsbn13(String rawIsbn) {
+        if (rawIsbn == null || rawIsbn.isBlank()) return Optional.empty();
+
+        // "1167372867 9791167372864" 같은 입력에서도 뒤쪽 13자리만 안전 추출
+        String isbn13 = tailIsbn13(rawIsbn);
+        if (isbn13 == null) return Optional.empty();
+
+        // Kakao API를 isbn 타겟으로 조회
+        List<BookDto> results = request(isbn13, "isbn", 10);
+        if (results.isEmpty()) return Optional.empty();
+
+        // 결과 중에서 ISBN-13이 정확히 일치하는 첫 항목만 반환
+        return results.stream()
+                .filter(dto -> isbn13.equals(safeIsbn13(dto)))
+                .findFirst()
+                // 혹시 정확 일치가 없다면 첫 결과라도 리턴하고 싶다면 아래 주석 해제
+                //.or(() -> Optional.of(results.get(0)))
+                ;
+    }
+
+    /** DTO의 raw isbn에서 13자리만 안전 추출 */
+    private String safeIsbn13(BookDto dto) {
+        if (dto == null || dto.getIsbn() == null) return null;
+        String digits = dto.getIsbn().replaceAll("[^0-9]", "");
+        if (digits.length() >= 13) {
+            return digits.substring(digits.length() - 13);
+        }
+        return null;
+    }
+
+    /** 입력 문자열에서 ISBN-13 추출 ("ISBN10 ISBN13" 형태도 처리) */
+    private String tailIsbn13(String raw) {
+        String digits = raw.replaceAll("[^0-9Xx]", "");
+        // X가 섞인 경우도 있으나 Kakao isbn 타겟은 13자리 숫자 매칭이 안전
+        // 뒤에서 13자리 숫자만 추출
+        String onlyDigits = digits.replaceAll("[^0-9]", "");
+        if (onlyDigits.length() >= 13) {
+            return onlyDigits.substring(onlyDigits.length() - 13);
+        }
+        return null;
+    }
+
+
 }

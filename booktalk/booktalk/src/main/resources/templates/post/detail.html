@@ -1,0 +1,184 @@
+﻿<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+    <meta charset="UTF-8"/>
+    <title th:text="${post.title} ?: '글 상세'">글 상세</title>
+    <style>
+        :root{
+            --bg:#121212; --ink:#f5f5f5; --muted:#bdbdbd; --line:#2b2b2b; --card:#1b1b1b;
+            --primary:#3b82f6; --danger:#ef4444; --ok:#22c55e; --chip:#2a2a2a; --chip-border:#3a3a3a;
+            --badge:#2f2f2f; --badge-border:#4b4b4b; --notice-bg:#3b2f13; --notice-ink:#ffecb5; --best-bg:#c7d2fe; --best-ink:#312e81;
+        }
+        *{box-sizing:border-box}
+        body{background:var(--bg); color:var(--ink); font-family:system-ui, -apple-system, Segoe UI, Roboto, sans-serif;}
+        a{color:#cbd5ff; text-decoration:none}
+        a:hover{text-decoration:underline}
+
+        .page{max-width:1000px; margin:28px auto; padding:0 16px;}
+        .head{display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;}
+        .title{font-size:22px; font-weight:800; color:#fff; line-height:1.35; word-break:keep-all}
+        .badges{display:flex; gap:8px; margin-top:10px;}
+        .badge{display:inline-block; font-size:12px; padding:2px 8px; border-radius:999px; border:1px solid var(--badge-border); background:var(--badge); color:#e5e7eb;}
+        .badge.notice{background:var(--notice-bg); color:var(--notice-ink); border-color:#8a6d1f;}
+        .badge.best{background:var(--best-bg); color:var(--best-ink); border-color:#a5b4fc;}
+
+        .meta{display:flex; gap:12px; color:var(--muted); font-size:12px;}
+        .meta .kv{display:flex; gap:6px; align-items:center;}
+        .divider{opacity:.45}
+
+        .content-wrap{background:var(--card); border:1px solid var(--line); border-radius:10px; overflow:hidden;}
+        .content{padding:20px; white-space:pre-wrap; line-height:1.8; font-size:16px; min-height:180px;}
+
+        /* 추천/비추 박스 */
+        .vote-wrap{display:flex; justify-content:center; margin:28px 0;}
+        .vote{width:300px; border:1px solid var(--line); background:var(--card); border-radius:8px; padding:16px; display:flex; justify-content:space-around; align-items:center;}
+        .vote .box{display:flex; flex-direction:column; align-items:center; gap:8px;}
+        .vote .count{font-size:20px; font-weight:800;}
+        .vote .btn{width:72px; height:72px; border-radius:50%; border:1px solid var(--chip-border); background:var(--chip); color:#fff; cursor:pointer;}
+        .vote .btn.up{border-color:#224da7; background:#1f2b44;}
+        .vote .btn.down{border-color:#7a2a2a; background:#3a2323;}
+        .vote .label{font-size:12px; color:var(--muted);}
+
+        .sub-actions{display:flex; gap:12px; justify-content:center; margin-top:10px; color:var(--muted); font-size:12px;}
+        .tool-row{display:flex; justify-content:flex-end; gap:8px; margin:10px 0 18px;}
+        .btn{padding:8px 12px; border-radius:8px; border:1px solid var(--chip-border); background:var(--chip); color:#fff; text-decoration:none; cursor:pointer;}
+        .btn.primary{background:var(--primary); border-color:var(--primary);}
+        .btn.danger{background:#7f1d1d; border-color:#7f1d1d;}
+        .btn.ghost{background:transparent; border-color:var(--chip-border);}
+
+        /* 하단 정보/뉴스 박스 (자리 채움용) */
+        .news{margin:26px 0 10px; border:1px solid var(--line); background:var(--card); border-radius:8px; padding:14px;}
+        .news-title{font-weight:700; margin-bottom:10px; color:#eaeaea; font-size:14px;}
+        .news ul{margin:0; padding-left:18px; color:var(--muted); font-size:13px;}
+        .news li{margin:6px 0;}
+
+        /* 댓글 */
+        .cmt-wrap{margin-top:14px; border:1px solid var(--line); background:var(--card); border-radius:8px; overflow:hidden;}
+        .cmt-head{display:flex; justify-content:space-between; align-items:center; padding:12px 14px; border-bottom:1px solid var(--line); background:#161616;}
+        .cmt-title{font-weight:700;}
+        .cmt-info{color:var(--muted); font-size:12px;}
+        .cmt-list .item{padding:12px 14px; border-bottom:1px solid var(--line);}
+        .cmt-list .meta{font-size:12px; color:var(--muted); margin-bottom:6px;}
+        .cmt-form{padding:12px 14px; display:flex; flex-direction:column; gap:10px;}
+        .cmt-row{display:flex; gap:8px;}
+        .cmt-row input[type="text"]{flex:1; min-width:0; padding:10px; border-radius:8px; border:1px solid var(--chip-border); background:#222; color:#fff;}
+        .cmt-row textarea{width:100%; min-height:90px; padding:10px; border-radius:8px; border:1px solid var(--chip-border); background:#222; color:#fff; resize:vertical;}
+        .cmt-actions{display:flex; justify-content:flex-end; gap:8px;}
+    </style>
+</head>
+<body>
+<div class="page">
+
+    <!-- 상단: 제목/배지/메타 -->
+    <div class="head">
+        <div>
+            <div class="title" th:text="${post.title}">제목</div>
+            <div class="badges">
+                <span class="badge notice" th:if="${post.isNotice}">공지</span>
+                <span class="badge best" th:if="${post.isBest}">개념</span>
+            </div>
+        </div>
+        <div class="meta">
+            <div class="kv"><strong th:text="${post.authorNickname}">작성자</strong></div>
+            <div class="divider">|</div>
+            <div class="kv" th:text="${#temporals.format(post.createdAt, 'yyyy.MM.dd HH:mm:ss')}">2025.09.14 19:23:42</div>
+            <div class="divider">|</div>
+            <div class="kv">조회 <span th:text="${post.viewCount}">0</span></div>
+            <div class="divider">|</div>
+            <div class="kv">추천 <span th:text="${post.likeCount}">0</span></div>
+            <div class="divider">|</div>
+            <div class="kv">댓글 <span th:text="${post.commentCount}">0</span></div>
+        </div>
+    </div>
+
+    <!-- 본문 -->
+    <div class="content-wrap">
+        <div class="content" th:text="${post.content}">본문 내용</div>
+    </div>
+
+    <!-- 툴바 (수정/삭제/목록) -->
+    <div class="tool-row">
+        <a class="btn" th:href="@{|/post/${post.id}/edit|}">수정</a>
+        <form th:action="@{|/post/${post.id}/delete|}" method="post" style="display:inline" onsubmit="return confirm('삭제하시겠어요?');">
+            <button type="submit" class="btn danger">삭제</button>
+        </form>
+        <a class="btn ghost" th:if="${isFixedBoard}" th:href="@{|/boards/${slug}|}">목록</a>
+        <a class="btn ghost" th:unless="${isFixedBoard}" th:href="@{|/boards/book-discussion/${post.boardId}|}">목록</a>
+    </div>
+
+    <!-- 추천/비추천 박스 -->
+    <div class="vote-wrap">
+        <div class="vote">
+            <div class="box">
+                <form th:action="@{|/post/${post.id}/like|}" method="post">
+                    <button class="btn up" type="submit" title="개념">★</button>
+                </form>
+                <div class="count" th:text="${post.likeCount}">0</div>
+                <div class="label">개념</div>
+            </div>
+            <div class="box">
+                <form th:action="@{|/post/${post.id}/unlike|}" method="post">
+                    <button class="btn down" type="submit" title="비추">▼</button>
+                </form>
+                <div class="count">0</div>
+                <div class="label">비추</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="sub-actions">
+        <span>📌 스크랩</span>
+        <span>🔗 공유</span>
+        <span>🚩 신고</span>
+    </div>
+
+    <!-- (옵션) 실시간 인기뉴스/사이드 블럭 흉내 -->
+    <div class="news">
+        <div class="news-title">실시간 인기 소식</div>
+        <ul>
+            <li><a href="javascript:void(0)">샘플 뉴스 1</a></li>
+            <li><a href="javascript:void(0)">샘플 뉴스 2</a></li>
+            <li><a href="javascript:void(0)">샘플 뉴스 3</a></li>
+        </ul>
+    </div>
+
+    <!-- 댓글 -->
+    <div class="cmt-wrap">
+        <div class="cmt-head">
+            <div class="cmt-title">댓글 <span th:text="${post.commentCount}">0</span></div>
+            <div class="cmt-info">※ 운영원칙 위반 댓글은 제재될 수 있습니다.</div>
+        </div>
+
+        <!-- 리스트(데모) -->
+        <div class="cmt-list" th:if="${comments != null}">
+            <div class="item" th:each="c : ${comments}">
+                <div class="meta">
+                    <strong th:text="${c.nickname}">익명</strong>
+                    <span class="divider">|</span>
+                    <span th:text="${#temporals.format(c.createdAt,'yyyy.MM.dd HH:mm')}">2025.09.14 19:24</span>
+                </div>
+                <div th:text="${c.content}">댓글 내용</div>
+            </div>
+        </div>
+        <div class="cmt-list" th:if="${comments == null}">
+            <div class="item" style="color:var(--muted)">아직 댓글이 없습니다.</div>
+        </div>
+
+        <!-- 입력폼(모양만) -->
+        <form class="cmt-form" th:action="@{|/post/${post.id}/comments|}" method="post">
+            <div class="cmt-row">
+                <input type="text" name="nickname" placeholder="닉네임 (선택)"/>
+                <input type="text" name="password" placeholder="비밀번호 (선택)"/>
+            </div>
+            <textarea name="content" placeholder="타인의 권리를 침해하거나 명예를 훼손하는 댓글은 운영원칙에 따라 제재될 수 있습니다."></textarea>
+            <div class="cmt-actions">
+                <button type="submit" class="btn primary">등록</button>
+                <a class="btn ghost" th:if="${isFixedBoard}" th:href="@{|/boards/${slug}|}">글목록</a>
+                <a class="btn ghost" th:unless="${isFixedBoard}" th:href="@{|/boards/book-discussion/${post.boardId}|}">글목록</a>
+            </div>
+        </form>
+    </div>
+
+</div>
+</body>
+</html>

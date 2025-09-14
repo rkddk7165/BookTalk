@@ -28,10 +28,16 @@ public class Post {
     @Lob
     private String content;
 
-    private Integer viewCount;
-    private Integer likeCount;
-    private Integer commentCount;
+    private Integer viewCount = 0;
+    private Integer likeCount = 0;
+    private Integer commentCount = 0;
 
-    private LocalDateTime createdAt;
+    private LocalDateTime createdAt = LocalDateTime.now();
     private LocalDateTime updatedAt;
+
+    /** 공지 여부 */
+    private boolean isNotice = false;
+
+    /** 개념글(베스트) 여부 */
+    private boolean isBest = false;
 }

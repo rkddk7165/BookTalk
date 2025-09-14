@@ -7,6 +7,7 @@ import myproject.booktalk.book.Book;
 import myproject.booktalk.user.User;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter @Setter
@@ -31,7 +32,7 @@ public class Board {
     @Enumerated(EnumType.STRING)
     private BoardType boardType;
 
-    private LocalDate createdAt;
+    private LocalDateTime createdAt;
 
 
 
