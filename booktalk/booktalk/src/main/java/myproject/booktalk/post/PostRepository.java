@@ -18,8 +18,8 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     @Query("""
            select new myproject.booktalk.post.dto.PostRow(
                p.id, p.title, p.user.nickname, p.createdAt,
-               p.viewCount, p.likeCount, p.commentCount,
-               p.isNotice, p.isBest, null
+               p.viewCount, p.likeCount, p.dislikeCount,
+               p.commentCount, p.isNotice, p.isBest, null
            )
            from Post p
            where p.board.id = :boardId and p.isNotice = true
@@ -30,8 +30,8 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     @Query("""
            select new myproject.booktalk.post.dto.PostRow(
                p.id, p.title, p.user.nickname, p.createdAt,
-               p.viewCount, p.likeCount, p.commentCount,
-               p.isNotice, p.isBest, null
+               p.viewCount, p.likeCount, p.dislikeCount,
+               p.commentCount, p.isNotice, p.isBest, null
            )
            from Post p
            where p.board.id = :boardId and p.isNotice = false
@@ -42,8 +42,8 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     @Query("""
            select new myproject.booktalk.post.dto.PostRow(
                p.id, p.title, p.user.nickname, p.createdAt,
-               p.viewCount, p.likeCount, p.commentCount,
-               p.isNotice, p.isBest, null
+               p.viewCount, p.likeCount, p.dislikeCount,
+               p.commentCount, p.isNotice, p.isBest, null
            )
            from Post p
            where p.board.id = :boardId and p.isNotice = false
@@ -54,8 +54,8 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     @Query("""
            select new myproject.booktalk.post.dto.PostRow(
                p.id, p.title, p.user.nickname, p.createdAt,
-               p.viewCount, p.likeCount, p.commentCount,
-               p.isNotice, p.isBest, null
+               p.viewCount, p.likeCount, p.dislikeCount,
+               p.commentCount, p.isNotice, p.isBest, null
            )
            from Post p
            where p.board.id = :boardId and p.isBest = true and p.isNotice = false
@@ -66,8 +66,8 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     @Query("""
            select new myproject.booktalk.post.dto.PostRow(
                p.id, p.title, p.user.nickname, p.createdAt,
-               p.viewCount, p.likeCount, p.commentCount,
-               p.isNotice, p.isBest, null
+               p.viewCount, p.likeCount, p.dislikeCount,
+               p.commentCount, p.isNotice, p.isBest, null
            )
            from Post p
            where p.board.id = :boardId and p.isBest = true and p.isNotice = false

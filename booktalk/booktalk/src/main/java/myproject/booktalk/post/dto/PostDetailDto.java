@@ -12,10 +12,10 @@ public record PostDetailDto(
         String content,
         Integer viewCount,
         Integer likeCount,
+        Integer dislikeCount,
         Integer commentCount,
         boolean isNotice,
         boolean isBest,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
-) {
-}
+) {}

@@ -8,6 +8,7 @@ import myproject.booktalk.post.dto.PostCreateRequest;
 import myproject.booktalk.post.dto.PostDetailDto;
 import myproject.booktalk.post.dto.PostUpdateRequest;
 import myproject.booktalk.user.User;
+import myproject.booktalk.user.session.SessionConst;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -47,7 +48,7 @@ public class PostController {
                          @RequestParam(required = false, defaultValue = "false") boolean isBest,
                          @RequestParam(required = false) String fixed, // 돌아갈 목록 경로 유지용
                          RedirectAttributes ra,
-                             @SessionAttribute User user) {
+                             @SessionAttribute(name = SessionConst.LOGIN_USER) User user) {
 
         Long loginUserId = user.getId();
         if (title == null || title.isBlank()) {
@@ -97,7 +98,7 @@ public class PostController {
                        @RequestParam(required = false) Boolean isNotice,
                        @RequestParam(required = false) Boolean isBest,
                        RedirectAttributes ra,
-                       @SessionAttribute User user) {
+                       @SessionAttribute(name = SessionConst.LOGIN_USER) User user) {
 
         Long editorUserId = user.getId();
         postService.update(new PostUpdateRequest(id, editorUserId, title, content, isNotice, isBest));
@@ -108,7 +109,7 @@ public class PostController {
     /* -------------------- 삭제 -------------------- */
     @PostMapping("/post/{id}/delete")
     public String delete(@PathVariable Long id, RedirectAttributes ra,
-                         @SessionAttribute User user) {
+                         @SessionAttribute(name = SessionConst.LOGIN_USER) User user) {
         Long requesterUserId = user.getId();
         Long boardId = postService.getDetail(id, false).boardId(); // 목록 리다이렉트용
         postService.delete(id, requesterUserId);
@@ -125,14 +126,30 @@ public class PostController {
 
     /* -------------------- 좋아요(+1) / 취소(-1) -------------------- */
     @PostMapping("/post/{id}/like")
-    public String like(@PathVariable Long id, RedirectAttributes ra) {
-        postService.like(id);
+    public String like(
+            @PathVariable Long id,
+            @SessionAttribute(name = "loginUser", required = true) User loginUser,
+            RedirectAttributes ra
+    ) {
+        try {
+            postService.like(id, loginUser.getId());
+        } catch (IllegalStateException e) {
+            ra.addFlashAttribute("errorMsg", "좋아요는 한 번만 누를 수 있습니다.");
+        }
         return "redirect:/post/" + id;
     }
 
-    @PostMapping("/post/{id}/unlike")
-    public String unlike(@PathVariable Long id, RedirectAttributes ra) {
-        postService.unlike(id);
+    @PostMapping("/post/{id}/dislike")
+    public String dislike(
+            @PathVariable Long id,
+            @SessionAttribute(name = "loginUser", required = true) User loginUser,
+            RedirectAttributes ra
+    ) {
+        try {
+            postService.dislike(id, loginUser.getId());
+        } catch (IllegalStateException e) {
+            ra.addFlashAttribute("errorMsg", "싫어요는 한 번만 누를 수 있습니다.");
+        }
         return "redirect:/post/" + id;
     }
 

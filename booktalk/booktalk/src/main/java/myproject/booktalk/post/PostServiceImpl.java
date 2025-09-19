@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import myproject.booktalk.board.Board;
 import myproject.booktalk.board.BoardRepository;
 import myproject.booktalk.post.dto.*;
+import myproject.booktalk.postReaction.PostReactionRepository;
 import myproject.booktalk.user.Role;
 import myproject.booktalk.user.User;
 import myproject.booktalk.user.UserRepository;
@@ -26,6 +27,7 @@ public class PostServiceImpl implements PostService {
     private final PostRepository postRepository;
     private final BoardRepository boardRepository;
     private final UserRepository userRepository;
+    private final PostReactionRepository reactionRepository;
 
     /* ===================== 생성 ===================== */
     @Override
@@ -120,6 +122,7 @@ public class PostServiceImpl implements PostService {
                 p.getContent(),
                 nz(p.getViewCount()),
                 nz(p.getLikeCount()),
+                nz(p.getDislikeCount()),
                 nz(p.getCommentCount()),
                 p.isNotice(),
                 p.isBest(),
@@ -134,17 +137,39 @@ public class PostServiceImpl implements PostService {
         postRepository.incrementViewCount(postId);
     }
 
-    @Override @Transactional
-    public void like(Long postId) {
-        // ⚠️ 진짜 '좋아요 토글'은 별도 Like 테이블이 필요합니다. 여기선 단순 +1만.
-        int updated = postRepository.incrementLikeCount(postId);
-        if (updated == 0) throw new EmptyResultDataAccessException("게시글 없음", 1);
+
+    @Override
+    @Transactional
+    public void like(Long postId, Long userId) {
+        if (!postRepository.existsById(postId)) {
+            throw new EmptyResultDataAccessException("게시글 없음", 1);
+        }
+
+        reactionRepository.ensureRow(postId, userId);
+
+        int updated = reactionRepository.markLikedIfNotYet(postId, userId);
+        if (updated == 0) {
+            throw new IllegalStateException("이미 좋아요를 누르셨습니다.");
+        }
+
+        postRepository.incrementLikeCount(postId);
     }
 
-    @Override @Transactional
-    public void dislike(Long postId) {
-        int updated = postRepository.incrementDislikeCount(postId);
-        if (updated ==)
+    @Override
+    @Transactional
+    public void dislike(Long postId, Long userId) {
+        if (!postRepository.existsById(postId)) {
+            throw new EmptyResultDataAccessException("게시글 없음", 1);
+        }
+
+        reactionRepository.ensureRow(postId, userId);
+
+        int updated = reactionRepository.markDislikedIfNotYet(postId, userId);
+        if (updated == 0) {
+            throw new IllegalStateException("이미 싫어요를 누르셨습니다.");
+        }
+
+        postRepository.incrementDislikeCount(postId);
     }
 
     /* ===================== 리스트(고정 게시판) ===================== */
@@ -177,8 +202,8 @@ public class PostServiceImpl implements PostService {
             long num = Math.max(start - i, 1);
             mapped.add(new PostRow(
                     p.id(), p.title(), p.authorNickname(), p.createdAt(),
-                    p.viewCount(), p.likeCount(), p.commentCount(),
-                    p.isNotice(), p.isBest(), num
+                    p.viewCount(), p.likeCount(), p.dislikeCount(),
+                    p.commentCount(), p.isNotice(), p.isBest(), num
             ));
         }
         return new org.springframework.data.domain.PageImpl<>(mapped, pageable, raw.getTotalElements());

@@ -9,6 +9,7 @@ public record PostRow(
         LocalDateTime createdAt,
         Integer viewCount,
         Integer likeCount,
+        Integer dislikeCount,
         Integer commentCount,
         boolean isNotice,
         boolean isBest,

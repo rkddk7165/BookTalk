@@ -106,22 +106,25 @@
         <a class="btn ghost" th:unless="${isFixedBoard}" th:href="@{|/boards/book-discussion/${post.boardId}|}">목록</a>
     </div>
 
-    <!-- 추천/비추천 박스 -->
+    <!-- 본문 어딘가에 추가 -->
+    <div id="flash-error" th:if="${errorMsg}" th:text="${errorMsg}" hidden></div>
+
+    <!-- 추천/비추천 박스 → 좋아요/싫어요 -->
     <div class="vote-wrap">
         <div class="vote">
             <div class="box">
                 <form th:action="@{|/post/${post.id}/like|}" method="post">
-                    <button class="btn up" type="submit" title="개념">★</button>
+                    <button class="btn up" type="submit" title="좋아요">👍</button>
                 </form>
                 <div class="count" th:text="${post.likeCount}">0</div>
-                <div class="label">개념</div>
+                <div class="label">좋아요</div> <!-- ✅ 라벨 -->
             </div>
             <div class="box">
-                <form th:action="@{|/post/${post.id}/unlike|}" method="post">
-                    <button class="btn down" type="submit" title="비추">▼</button>
+                <form th:action="@{|/post/${post.id}/dislike|}" method="post">  <!-- ✅ 경로 -->
+                    <button class="btn down" type="submit" title="싫어요">👎</button>
                 </form>
-                <div class="count">0</div>
-                <div class="label">비추</div>
+                <div class="count" th:text="${post.dislikeCount}">0</div>       <!-- ✅ 바인딩 -->
+                <div class="label">싫어요</div>                                  <!-- ✅ 라벨 -->
             </div>
         </div>
     </div>
@@ -180,5 +183,13 @@
     </div>
 
 </div>
+
+<script>
+    (function(){
+        var el = document.getElementById('flash-error');
+        if (el) alert(el.textContent);
+    })();
+</script>
+
 </body>
 </html>

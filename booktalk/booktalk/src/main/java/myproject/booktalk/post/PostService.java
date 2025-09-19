@@ -19,9 +19,10 @@ public interface PostService {
     PostDetailDto getDetail(Long postId, boolean increaseView);
 
     // 카운터
-    void increaseView(Long postId);
-    void like(Long postId);          // 임시 단순 +1 (진짜 좋아요 토글은 별도 엔티티 필요)
-    void dislike(Long postId);
+    void increaseView(Long postId);     // 임시 단순 +1 (진짜 좋아요 토글은 별도 엔티티 필요)
+    void like(Long postId, Long userId);    // 신규
+
+    void dislike(Long postId, Long userId);
 
     // 리스트(고정 게시판)
     Page<PostRow> listByBoard(Long boardId, String tab, String sort, int page, int size);
