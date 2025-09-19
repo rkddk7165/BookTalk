@@ -29,7 +29,10 @@ public class Post {
     private String content;
 
     private Integer viewCount = 0;
+
     private Integer likeCount = 0;
+    private Integer dislikeCount = 0;
+
     private Integer commentCount = 0;
 
     private LocalDateTime createdAt = LocalDateTime.now();

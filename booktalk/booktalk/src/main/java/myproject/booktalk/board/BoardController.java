@@ -1,6 +1,7 @@
 package myproject.booktalk.board;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import myproject.booktalk.BoardCreationRequest.BoardCreationRequestService;
 import myproject.booktalk.BoardCreationRequest.BoardCreationRequestServiceImpl;
 import myproject.booktalk.board.service.BoardService;
@@ -25,6 +26,7 @@ import java.util.Optional;
 @Controller
 @RequiredArgsConstructor
 @RequestMapping("/boards")
+@Slf4j
 public class BoardController {
 
     private final BoardService boardService;
@@ -100,6 +102,8 @@ public class BoardController {
         // 2) 고정 게시판 보장 (slug 기반 버전 사용!)
         Long boardId = boardService.ensureFixedBoard(fb.getTitle(), fb.getDescription(), null);
 
+        log.info("tab = {}", tab);
+
         // 3) 목록/공지 조회
         Page<PostRow> posts   = postService.listByBoard(boardId, tab, sort, page, size);
         List<PostRow> notices = postService.notices(boardId);
@@ -111,7 +115,7 @@ public class BoardController {
         model.addAttribute("boardDesc", fb.getDescription());
         model.addAttribute("boardType", BoardType.FIXED);
 
-        model.addAttribute("posts", posts.getContent());
+        model.addAttribute("posts", posts.getContent());    //TODO: DTO로 변환해서 뷰로 넘기기 (Map)
         model.addAttribute("page", posts);
         model.addAttribute("notices", notices);
 

@@ -3,6 +3,7 @@ package myproject.booktalk.post;
 import jakarta.persistence.LockModeType;
 import myproject.booktalk.post.dto.PostRow;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;  // ✅
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
@@ -74,6 +75,8 @@ public interface PostRepository extends JpaRepository<Post, Long> {
            """)
     Page<PostRow> findBestPopular(Long boardId, Pageable pageable);
 
+
+
     /* ===== 상세 조회(필요 연관만 페치) ===== */
     @Query("""
            select p from Post p
@@ -97,10 +100,13 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     int incrementLikeCount(Long postId);
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)
-    @Query("update Post p set p.likeCount = case when coalesce(p.likeCount,0) > 0 then p.likeCount - 1 else 0 end where p.id = :postId")
-    int decrementLikeCount(Long postId);
+    @Query("update Post p set p.dislikeCount = coalesce(p.dislikeCount, 0) + 1 where p.id = :postId ")
+    int incrementDislikeCount(Long postId);
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("update Post p set p.commentCount = coalesce(p.commentCount,0) + :delta where p.id = :postId")
     int bumpCommentCount(Long postId, int delta);
+
+
+
 }

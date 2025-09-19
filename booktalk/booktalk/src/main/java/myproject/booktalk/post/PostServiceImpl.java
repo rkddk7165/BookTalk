@@ -1,6 +1,7 @@
 package myproject.booktalk.post;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import myproject.booktalk.board.Board;
 import myproject.booktalk.board.BoardRepository;
 import myproject.booktalk.post.dto.*;
@@ -19,6 +20,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+@Slf4j
 public class PostServiceImpl implements PostService {
 
     private final PostRepository postRepository;
@@ -140,9 +142,9 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override @Transactional
-    public void unlike(Long postId) {
-        int updated = postRepository.decrementLikeCount(postId);
-        if (updated == 0) throw new EmptyResultDataAccessException("게시글 없음", 1);
+    public void dislike(Long postId) {
+        int updated = postRepository.incrementDislikeCount(postId);
+        if (updated ==)
     }
 
     /* ===================== 리스트(고정 게시판) ===================== */
@@ -151,6 +153,9 @@ public class PostServiceImpl implements PostService {
         String _tab  = (tab == null || tab.isBlank()) ? "all" : tab;
         String _sort = (sort == null || sort.isBlank()) ? "latest" : sort;
         var pageable = PageRequest.of(page, size);
+
+        log.info("tab = {}", _tab);
+        log.info("sort = {}", _sort);
 
         Page<PostRow> raw = switch (_tab) {
             case "best" -> switch (_sort) {

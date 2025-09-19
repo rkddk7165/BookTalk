@@ -21,7 +21,7 @@ public interface PostService {
     // 카운터
     void increaseView(Long postId);
     void like(Long postId);          // 임시 단순 +1 (진짜 좋아요 토글은 별도 엔티티 필요)
-    void unlike(Long postId);        // 임시 -1 클램프
+    void dislike(Long postId);
 
     // 리스트(고정 게시판)
     Page<PostRow> listByBoard(Long boardId, String tab, String sort, int page, int size);
