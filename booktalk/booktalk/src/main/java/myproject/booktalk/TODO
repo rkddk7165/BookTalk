@@ -1,0 +1,71 @@
+TODO:   책이름 통일해서 게시판 만들기
+        웹 입력/출력 DTO로 하고, DTO에서 validation
+        내정보 수정
+        디자인 통일
+        개념글 (좋아요 15개 이상)
+        댓글 디자인 수정
+        실시간 인기 소식
+        게시판 좌우 배너
+        추후에 비로그인 이용 기능
+        상단바 통일
+        신고/차단 기능
+        각 게시판 운영자 role 추가
+
+
+
+
+
+
+        운영 안전성
+
+        spring.jpa.hibernate.ddl-auto=create → 운영 금지. Flyway/Liquibase로 마이그레이션 전환 권장.
+
+        DB 비밀번호·Kakao 키가 application.properties에 존재 → 환경변수/Secret Manager로 분리.
+
+
+
+
+        패키지 네이밍 컨벤션
+
+        패키지명에 대문자 포함: BoardCreationRequest, bookSearch, postReaction
+        → Java 관례대로 소문자로 정리(예: boardrequest, booksearch, postreaction)하고 import 경로 일괄 리팩터링.
+
+
+
+
+        성능/쿼리
+
+        조회/정렬/필터 잦은 컬럼 인덱스 권장
+
+        post(board_id, created_at), post(is_notice, is_best), comment(post_id, depth)
+
+        조회수/좋아요/싫어요 증분 쿼리(@Modifying, 트랜잭션 범위) 점검 및 일관화.
+
+
+
+
+        인증/인가
+
+        세션 기반 인터셉터 경로 재확인: 인증 제외/포함 경로, /api/** 보호 여부, 로그아웃은 POST 유지.
+
+        관리자 전용 API(게시판 개설 승인/반려) → Role 체크 명시(컨트롤러 단/인터셉터/어노테이션 레벨).
+
+
+
+
+        도메인 모델/검증
+
+        DTO 입력값에 Bean Validation 추가(@NotNull, @Size, @Email 등).
+
+        엔티티 equals/hashCode 전략 검토(식별자 기반).
+
+
+
+
+        빌드/설정 자잘한 것
+
+        spring-boot-starter-thymeleaf 중복 선언 제거.
+
+        spring.thymeleaf.cache=false는 개발용으로 유지, 운영에서는 켜기.
+
+
