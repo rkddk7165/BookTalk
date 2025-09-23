@@ -29,8 +29,16 @@ public class InitData {
         user2.setHost(Host.LOCAL);
         user2.setRole(Role.ADMIN);
 
+        User user3 = new User();
+        user3.setEmail("1111@naver.com");
+        user3.setPassword("1234");
+        user3.setNickname("카이사");
+        user3.setHost(Host.LOCAL);
+        user3.setRole(Role.USER);
+
         userRepository.save(user);
         userRepository.save(user2);
+        userRepository.save(user3);
 
     }
 }

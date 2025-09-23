@@ -32,8 +32,6 @@ dependencies {
 
 	// MySQL Driver
 	runtimeOnly 'com.mysql:mysql-connector-j'
-	// (선택) Spring Boot DevTools
-	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'

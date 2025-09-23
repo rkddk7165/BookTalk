@@ -61,9 +61,15 @@
         .cmt-list .meta{font-size:12px; color:var(--muted); margin-bottom:6px;}
         .cmt-form{padding:12px 14px; display:flex; flex-direction:column; gap:10px;}
         .cmt-row{display:flex; gap:8px;}
-        .cmt-row input[type="text"]{flex:1; min-width:0; padding:10px; border-radius:8px; border:1px solid var(--chip-border); background:#222; color:#fff;}
         .cmt-row textarea{width:100%; min-height:90px; padding:10px; border-radius:8px; border:1px solid var(--chip-border); background:#222; color:#fff; resize:vertical;}
         .cmt-actions{display:flex; justify-content:flex-end; gap:8px;}
+
+        /* toast */
+        #toast { position: fixed; left:50%; bottom:40px; transform:translateX(-50%);
+            max-width:80vw; padding:12px 16px; border-radius:8px; background:rgba(0,0,0,.8);
+            color:#fff; font-size:14px; opacity:0; pointer-events:none;
+            transition: opacity .25s ease, transform .25s ease; z-index:9999; }
+        #toast.show { opacity:1; transform:translateX(-50%) translateY(-6px); }
     </style>
 </head>
 <body>
@@ -81,11 +87,11 @@
         <div class="meta">
             <div class="kv"><strong th:text="${post.authorNickname}">작성자</strong></div>
             <div class="divider">|</div>
-            <div class="kv" th:text="${#temporals.format(post.createdAt, 'yyyy.MM.dd HH:mm:ss')}">2025.09.14 19:23:42</div>
+            <div class="kv" th:text="${#temporals.format(post.createdAt, 'yyyy.MM.dd HH:mm:ss')}"></div>
             <div class="divider">|</div>
             <div class="kv">조회 <span th:text="${post.viewCount}">0</span></div>
             <div class="divider">|</div>
-            <div class="kv">추천 <span th:text="${post.likeCount}">0</span></div>
+            <div class="kv">좋아요 <span th:text="${post.likeCount}">0</span></div>
             <div class="divider">|</div>
             <div class="kv">댓글 <span th:text="${post.commentCount}">0</span></div>
         </div>
@@ -93,10 +99,10 @@
 
     <!-- 본문 -->
     <div class="content-wrap">
-        <div class="content" th:text="${post.content}">본문 내용</div>
+        <div class="content" th:text="${post.content}"></div>
     </div>
 
-    <!-- 툴바 (수정/삭제/목록) -->
+    <!-- 툴바 -->
     <div class="tool-row">
         <a class="btn" th:href="@{|/post/${post.id}/edit|}">수정</a>
         <form th:action="@{|/post/${post.id}/delete|}" method="post" style="display:inline" onsubmit="return confirm('삭제하시겠어요?');">
@@ -106,10 +112,11 @@
         <a class="btn ghost" th:unless="${isFixedBoard}" th:href="@{|/boards/book-discussion/${post.boardId}|}">목록</a>
     </div>
 
-    <!-- 본문 어딘가에 추가 -->
+    <!-- flash -->
     <div id="flash-error" th:if="${errorMsg}" th:text="${errorMsg}" hidden></div>
+    <div id="flash-toast" th:if="${toast}" th:text="${toast}" hidden></div>
 
-    <!-- 추천/비추천 박스 → 좋아요/싫어요 -->
+    <!-- 좋아요/싫어요 -->
     <div class="vote-wrap">
         <div class="vote">
             <div class="box">
@@ -117,14 +124,14 @@
                     <button class="btn up" type="submit" title="좋아요">👍</button>
                 </form>
                 <div class="count" th:text="${post.likeCount}">0</div>
-                <div class="label">좋아요</div> <!-- ✅ 라벨 -->
+                <div class="label">좋아요</div>
             </div>
             <div class="box">
-                <form th:action="@{|/post/${post.id}/dislike|}" method="post">  <!-- ✅ 경로 -->
+                <form th:action="@{|/post/${post.id}/dislike|}" method="post">
                     <button class="btn down" type="submit" title="싫어요">👎</button>
                 </form>
-                <div class="count" th:text="${post.dislikeCount}">0</div>       <!-- ✅ 바인딩 -->
-                <div class="label">싫어요</div>                                  <!-- ✅ 라벨 -->
+                <div class="count" th:text="${post.dislikeCount}">0</div>
+                <div class="label">싫어요</div>
             </div>
         </div>
     </div>
@@ -135,7 +142,7 @@
         <span>🚩 신고</span>
     </div>
 
-    <!-- (옵션) 실시간 인기뉴스/사이드 블럭 흉내 -->
+    <!-- 뉴스 -->
     <div class="news">
         <div class="news-title">실시간 인기 소식</div>
         <ul>
@@ -152,42 +159,82 @@
             <div class="cmt-info">※ 운영원칙 위반 댓글은 제재될 수 있습니다.</div>
         </div>
 
-        <!-- 리스트(데모) -->
-        <div class="cmt-list" th:if="${comments != null}">
+        <!-- 댓글 목록 -->
+        <div class="cmt-list" th:if="${#lists.size(comments) > 0}">
             <div class="item" th:each="c : ${comments}">
                 <div class="meta">
-                    <strong th:text="${c.nickname}">익명</strong>
+                    <strong th:text="${c.authorNickname}">익명</strong>
                     <span class="divider">|</span>
-                    <span th:text="${#temporals.format(c.createdAt,'yyyy.MM.dd HH:mm')}">2025.09.14 19:24</span>
+                    <span th:text="${#temporals.format(c.createdAt,'yyyy.MM.dd HH:mm')}">시간</span>
+
+                    <!-- 내 댓글이면 삭제 버튼 노출 -->
+                    <form th:if="${loginUserId != null and loginUserId == c.userId}"
+                          th:action="@{|/comments/${c.id}/delete|}" method="post" style="margin-left:auto">
+                        <input type="hidden" name="postId" th:value="${post.id}"/>
+                        <button type="submit" class="btn ghost" onclick="return confirm('삭제하시겠어요?')">삭제</button>
+                    </form>
                 </div>
-                <div th:text="${c.content}">댓글 내용</div>
+
+                <div th:classappend="${c.deleted} ? 'muted' : ''"
+                     th:text="${c.content}">댓글 내용</div>
+
+                <!-- 대댓글 목록 -->
+                <div class="replies" th:if="${#lists.size(c.replies) > 0}">
+                    <div class="item" th:each="r : ${c.replies}" style="margin-left:24px;">
+                        <div class="meta">
+                            <strong th:text="${r.authorNickname}">익명</strong>
+                            <span class="divider">|</span>
+                            <span th:text="${#temporals.format(r.createdAt,'yyyy.MM.dd HH:mm')}"></span>
+
+                            <form th:if="${loginUserId != null and loginUserId == r.userId}"
+                                  th:action="@{|/comments/${r.id}/delete|}" method="post" style="margin-left:auto">
+                                <input type="hidden" name="postId" th:value="${post.id}"/>
+                                <button type="submit" class="btn ghost" onclick="return confirm('삭제하시겠어요?')">삭제</button>
+                            </form>
+                        </div>
+                        <div th:text="${r.content}">대댓글 내용</div>
+                    </div>
+                </div>
+
+                <!-- 대댓글 작성 폼 -->
+                <form class="cmt-form" th:action="@{|/post/${post.id}/comments|}" method="post" style="margin-left:24px;">
+                    <textarea name="content" rows="2" placeholder="답글을 입력하세요" required></textarea>
+                    <input type="hidden" name="parentId" th:value="${c.id}"/>
+                    <div class="cmt-actions">
+                        <button type="submit" class="btn">답글 달기</button>
+                    </div>
+                </form>
             </div>
         </div>
-        <div class="cmt-list" th:if="${comments == null}">
+
+        <div class="cmt-list" th:if="${#lists.isEmpty(comments)}">
             <div class="item" style="color:var(--muted)">아직 댓글이 없습니다.</div>
         </div>
 
-        <!-- 입력폼(모양만) -->
+        <!-- 루트 댓글 작성 -->
         <form class="cmt-form" th:action="@{|/post/${post.id}/comments|}" method="post">
-            <div class="cmt-row">
-                <input type="text" name="nickname" placeholder="닉네임 (선택)"/>
-                <input type="text" name="password" placeholder="비밀번호 (선택)"/>
-            </div>
-            <textarea name="content" placeholder="타인의 권리를 침해하거나 명예를 훼손하는 댓글은 운영원칙에 따라 제재될 수 있습니다."></textarea>
+            <textarea name="content" placeholder="댓글을 입력하세요" required></textarea>
             <div class="cmt-actions">
                 <button type="submit" class="btn primary">등록</button>
-                <a class="btn ghost" th:if="${isFixedBoard}" th:href="@{|/boards/${slug}|}">글목록</a>
-                <a class="btn ghost" th:unless="${isFixedBoard}" th:href="@{|/boards/book-discussion/${post.boardId}|}">글목록</a>
             </div>
         </form>
     </div>
 
+
 </div>
 
+<!-- toast 메시지 -->
+<div id="toast" role="status" aria-live="polite"></div>
 <script>
-    (function(){
-        var el = document.getElementById('flash-error');
-        if (el) alert(el.textContent);
+    (function () {
+        function show(msg){
+            var t=document.getElementById('toast');
+            t.textContent=msg;
+            t.classList.add('show');
+            setTimeout(()=>t.classList.remove('show'),2200);
+        }
+        var e=document.getElementById('flash-error'); if(e) show(e.textContent);
+        var s=document.getElementById('flash-toast'); if(s) show(s.textContent);
     })();
 </script>
 

@@ -1,0 +1,156 @@
+﻿<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+    <meta charset="UTF-8"/>
+    <title>자유게시판</title>
+    <link rel="stylesheet" th:href="@{/css/main.css}"/>
+    <style>
+        :root{
+            --bg:#ffffff; --fg:#222; --muted:#6b7280; --line:#e5e7eb; --line-dark:#d1d5db;
+            --primary:#1f3a8a; --primary-ink:#fff; --chip:#eef2ff; --chip-ink:#3730a3;
+            --hover:#f9fafb; --notice:#fef3c7; --ad:#f1f5f9;
+        }
+        body{background:var(--bg); color:var(--fg);}
+        .page{max-width:1080px; margin:32px auto; padding:0 16px;}
+        .header{display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;}
+        .title{font-size:22px; font-weight:700;}
+        .desc{color:var(--muted); margin-top:6px;}
+        .actions .btn{padding:8px 12px; border-radius:8px; border:1px solid var(--line-dark); background:var(--primary); color:var(--primary-ink); text-decoration:none;}
+        /* 상단 필터/탭 */
+        .toolbar{display:flex; gap:8px; align-items:center; margin:12px 0 16px;}
+        .chip{padding:8px 12px; border:1px solid var(--line-dark); border-radius:8px; background:#fff; color:var(--fg); text-decoration:none;}
+        .chip.active{background:var(--chip); color:var(--chip-ink); border-color:#c7d2fe; font-weight:600;}
+        .spacer{flex:1;}
+        /* 테이블 */
+        .table{width:100%; border-collapse:collapse; table-layout:fixed; border-top:2px solid var(--primary);}
+        .th, .td{padding:10px 8px; border-bottom:1px solid var(--line);}
+        .th{background:#f8fafc; color:#111827; font-weight:700;}
+        .col-no{width:90px; text-align:center;}
+        .col-title{width:auto;}
+        .col-author{width:160px; text-align:center;}
+        .col-date{width:130px; text-align:center;}
+        .col-views{width:90px; text-align:center;}
+        .col-reco{width:90px; text-align:center;}
+        .row:hover{background:var(--hover);}
+        .badge{display:inline-block; font-size:12px; padding:2px 6px; border-radius:999px; border:1px solid var(--line-dark); color:#374151; background:#fff; margin-right:6px;}
+        .badge.notice{background:var(--notice); border-color:#f59e0b; color:#92400e;}
+        .badge.ad{background:var(--ad); color:#0f172a;}
+        .title-link{color:#111827; text-decoration:none;}
+        .title-link:hover{text-decoration:underline;}
+        .meta{color:var(--muted); font-size:12px; margin-left:6px;}
+        .count{color:#ef4444; margin-left:4px;}
+        /* 페이지네이션 */
+        .pagination{display:flex; gap:6px; justify-content:center; align-items:center; margin:18px 0;}
+        .page-btn{padding:6px 10px; border:1px solid var(--line-dark); border-radius:6px; text-decoration:none; color:var(--fg); background:#fff;}
+        .page-btn.active{background:var(--chip); color:var(--chip-ink); border-color:#c7d2fe; font-weight:600;}
+    </style>
+</head>
+<body>
+<div class="page">
+    <!-- 헤더 -->
+    <div class="header">
+        <div>
+            <div class="title">책 추천 게시판</div>
+            <div class="desc">감명 깊게 읽은 책을 소개 해 주세요!</div>
+        </div>
+        <div class="actions">
+            <a class="btn" th:href="@{/post/new(fixed='recommend')}">새 글쓰기</a>
+        </div>
+    </div>
+
+    <!-- 상단 필터/탭 -->
+    <div class="toolbar">
+        <a class="chip"
+           th:classappend="${#strings.equals(param.tab?.get(0),'all') or param.tab == null} ? ' active' : ''"
+           th:href="@{/boards/recommend(tab='all', sort=${param.sort!=null?param.sort.get(0):'latest'})}">
+            전체글
+        </a>
+        <a class="chip"
+           th:classappend="${#strings.equals(param.tab?.get(0),'best')} ? ' active' : ''"
+           th:href="@{/boards/recommend(tab='best', sort=${param.sort!=null?param.sort.get(0):'latest'})}">
+            개념글
+        </a>
+        <a class="chip"
+           th:classappend="${#strings.equals(param.tab?.get(0),'notice')} ? ' active' : ''"
+           th:href="@{/boards/recommend(tab='notice', sort=${param.sort!=null?param.sort.get(0):'latest'})}">
+            공지
+        </a>
+
+        <div class="spacer"></div>
+
+        <a class="chip"
+           th:classappend="${param.sort == null or #strings.equals(param.sort.get(0),'latest')} ? ' active' : ''"
+           th:href="@{/boards/recommend(tab=${param.tab!=null?param.tab.get(0):'all'}, sort='latest')}">최신</a>
+        <a class="chip"
+           th:classappend="${#strings.equals(param.sort?.get(0),'popular')} ? ' active' : ''"
+           th:href="@{/boards/recommend(tab=${param.tab!=null?param.tab.get(0):'all'}, sort='popular')}">인기</a>
+    </div>
+
+    <!-- 리스트 테이블 -->
+    <table class="table">
+        <colgroup>
+            <col class="col-no"/><col class="col-title"/><col class="col-author"/><col class="col-date"/><col class="col-views"/><col class="col-reco"/>
+        </colgroup>
+        <thead>
+        <tr>
+            <th class="th col-no">번호</th>
+            <th class="th col-title">제목</th>
+            <th class="th col-author">글쓴이</th>
+            <th class="th col-date">작성일</th>
+            <th class="th col-views">조회</th>
+            <th class="th col-reco">추천</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <!-- 공지 먼저 -->
+        <tr class="row" th:each="n : ${notices}">
+            <td class="td col-no"><span class="badge notice">공지</span></td>
+            <td class="td col-title">
+                <a class="title-link" th:href="@{|/post/${n.id}?slug=recommend|}" th:text="${n.title}">제목</a>
+                <span class="meta" th:if="${n.commentCount>0}">[<span th:text="${n.commentCount}">0</span>]</span>
+            </td>
+            <td class="td col-author" th:text="${n.authorNickname}">운영자</td>
+            <td class="td col-date" th:text="${#temporals.format(n.createdAt,'yy.MM.dd HH:mm')}">25.09.14 19:23</td>
+            <td class="td col-views" th:text="${n.viewCount}">0</td>
+            <td class="td col-reco" th:text="${n.likeCount}">0</td>
+        </tr>
+
+        <!-- 일반/개념글 -->
+        <tr class="row" th:each="p : ${posts}">
+            <td class="td col-no" th:text="${p.number != null ? p.number : p.id}">1</td>
+            <td class="td col-title">
+                <span th:if="${p.isBest}" class="badge">개념</span>
+                <a class="title-link" th:href="@{|/post/${p.id}?slug=recommend|}" th:text="${p.title}">글 제목</a>
+                <span class="meta" th:if="${p.commentCount>0}">[<span th:text="${p.commentCount}">0</span>]</span>
+            </td>
+            <td class="td col-author" th:text="${p.authorNickname}">닉네임</td>
+            <td class="td col-date" th:text="${#temporals.format(p.createdAt,'HH:mm')}">19:23</td>
+            <td class="td col-views" th:text="${p.viewCount}">0</td>
+            <td class="td col-reco" th:text="${p.likeCount}">0</td>
+        </tr>
+
+        <!-- 비어있을 때 -->
+        <tr th:if="${(posts == null or #lists.isEmpty(posts)) and (notices == null or #lists.isEmpty(notices))}">
+            <td class="td" colspan="6" style="text-align:center; color:var(--muted); padding:36px 0;">등록된 글이 없습니다.</td>
+        </tr>
+        </tbody>
+    </table>
+
+    <!-- 페이지네이션 -->
+    <div class="pagination" th:if="${page != null}">
+        <a class="page-btn" th:if="${!page.first}"
+           th:href="@{/boards/recommend(page=${page.number-1}, tab=${param.tab!=null?param.tab.get(0):'all'}, sort=${param.sort!=null?param.sort.get(0):'latest'})}">이전</a>
+
+        <span th:each="i : ${#numbers.sequence(0, page.totalPages-1)}">
+            <a class="page-btn" th:classappend="${i==page.number}? ' active' : ''"
+               th:text="${i+1}"
+               th:href="@{/boards/recommend(page=${i}, tab=${param.tab!=null?param.tab.get(0):'all'}, sort=${param.sort!=null?param.sort.get(0):'latest'})}">1</a>
+        </span>
+
+        <a class="page-btn" th:if="${!page.last}"
+           th:href="@{/boards/recommend(page=${page.number+1}, tab=${param.tab!=null?param.tab.get(0):'all'}, sort=${param.sort!=null?param.sort.get(0):'latest'})}">다음</a>
+    </div>
+</div>
+</body>
+</html>

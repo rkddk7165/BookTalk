@@ -23,10 +23,17 @@ public class Comment {
     @JoinColumn(name = "user_id")
     private User user;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_id")
+    private Comment parent;
+
     @Lob
     private String content;
 
-    private LocalDateTime createdAt;
+    private LocalDateTime createdAt = LocalDateTime.now();
+
+    private boolean deleted = false;
+    private Integer depth = 0;      // 0 = 댓글, 1 = 대댓글
 
 
 }

@@ -16,7 +16,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class HomeController {
 
-    @GetMapping("/") // 로그인 성공 후 여기로 리다이렉트되도록 설정(시큐리티 사용 시 defaultSuccessUrl("/"))
+    @GetMapping("/") 
     public String home(
             @SessionAttribute(name = SessionConst.LOGIN_USER, required = false) User loginUser,
             Model model

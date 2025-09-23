@@ -1,9 +1,13 @@
 package myproject.booktalk.post;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import myproject.booktalk.board.service.BoardService;
 import myproject.booktalk.board.BoardType;
 import myproject.booktalk.board.FixedBoardSlug;
+import myproject.booktalk.comment.CommentRepository;
+import myproject.booktalk.comment.dto.CommentDto;
+import myproject.booktalk.comment.service.CommentService;
 import myproject.booktalk.post.dto.PostCreateRequest;
 import myproject.booktalk.post.dto.PostDetailDto;
 import myproject.booktalk.post.dto.PostUpdateRequest;
@@ -14,12 +18,16 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.List;
+
 @Controller
 @RequiredArgsConstructor
+@Slf4j
 public class PostController {
 
     private final PostService postService;
     private final BoardService boardService;
+    private final CommentService commentService;
 
     /* -------------------- 글쓰기 폼 -------------------- */
     /**
@@ -67,9 +75,20 @@ public class PostController {
     @GetMapping("/post/{id}")
     public String detail(@PathVariable Long id,
                          @RequestParam(required = false) String slug,
+                         @SessionAttribute(name = SessionConst.LOGIN_USER) User loginUser,
                          Model model) {
         var dto = postService.getDetail(id, true);
         model.addAttribute("post", dto);
+
+        List<CommentDto> comments = commentService.getComments(id);
+
+        model.addAttribute("comments", comments);
+
+        log.info(comments.toString());
+
+        Long loginUserId = (loginUser != null) ? loginUser.getId() : null;
+        model.addAttribute("loginUserId", loginUserId);
+
         boolean fixed = boardService.getBoardType(dto.boardId()) == BoardType.FIXED;
         model.addAttribute("isFixedBoard", fixed);
         if (fixed) {
