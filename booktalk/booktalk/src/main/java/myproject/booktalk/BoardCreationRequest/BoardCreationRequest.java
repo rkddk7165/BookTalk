@@ -34,6 +34,7 @@ public class BoardCreationRequest {
     @Lob
     private String rejectReason;
 
+
     private LocalDateTime requestTime;
 
     private LocalDateTime acceptedTime;

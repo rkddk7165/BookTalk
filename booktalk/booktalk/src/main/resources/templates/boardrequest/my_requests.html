@@ -1,0 +1,46 @@
+﻿<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+    <meta charset="UTF-8"/>
+    <title>내 게시판 요청</title>
+    <style>
+        body{background:#121212;color:#eee;font-family:system-ui,Segoe UI,Roboto,sans-serif;}
+        .page{max-width:800px;margin:28px auto;padding:0 16px;}
+        table{width:100%;border-collapse:collapse;}
+        th,td{padding:8px;border-bottom:1px solid #2b2b2b;}
+        th{color:#bbb;text-align:left;}
+        .btn{padding:4px 8px;border:1px solid #333;border-radius:6px;background:#222;color:#fff;cursor:pointer;}
+        .btn.danger{background:#7f1d1d;border-color:#7f1d1d;}
+    </style>
+</head>
+<body>
+<div class="page">
+    <h2>내 게시판 생성 요청</h2>
+    <table>
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>도서</th>
+            <th>상태</th>
+            <th>요청일시</th>
+            <th>관리</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="r : ${requests}">
+            <td th:text="${r.id}">1</td>
+            <td th:text="${r.book.title}">도서명</td>
+            <td th:text="${r.status}">PENDING</td>
+            <td th:text="${#temporals.format(r.requestTime,'yyyy-MM-dd HH:mm')}">2025-09-23</td>
+            <td>
+                <form th:if="${r.status.name() == 'PENDING'}"
+                      th:action="@{|/board-requests/${r.id}/cancel|}" method="post">
+                    <button type="submit" class="btn danger">취소</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>

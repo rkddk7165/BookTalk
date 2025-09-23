@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface BoardCreationRequestRepository extends JpaRepository<BoardCreationRequest, Long> {
@@ -27,4 +28,22 @@ public interface BoardCreationRequestRepository extends JpaRepository<BoardCreat
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select r from BoardCreationRequest r where r.id = :id")
     Optional<BoardCreationRequest> findForUpdate(@Param("id") Long id);
+
+    @Query("""
+        select r from BoardCreationRequest r
+        join fetch r.book b
+        join fetch r.user u
+        where r.status = myproject.booktalk.BoardCreationRequest.Status.PENDING
+        order by r.requestTime asc
+    """)
+    List<BoardCreationRequest> findPendings();
+
+    @Query("""
+       select r from BoardCreationRequest r
+       join fetch r.user u
+       join fetch r.book b
+       order by r.requestTime desc
+    """)
+    Page<BoardCreationRequest> findAllWithJoins(Pageable pageable);
+
 }

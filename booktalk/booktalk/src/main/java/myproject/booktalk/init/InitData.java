@@ -25,7 +25,7 @@ public class InitData {
         User user2 = new User();
         user2.setEmail("admin@naver.com");
         user2.setPassword("1234");
-        user2.setNickname("admin");
+        user2.setNickname("templates/admin");
         user2.setHost(Host.LOCAL);
         user2.setRole(Role.ADMIN);
 

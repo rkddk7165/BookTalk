@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import myproject.booktalk.board.service.BoardService;
 import myproject.booktalk.book.Book;
 import myproject.booktalk.book.BookRepository;
+import myproject.booktalk.user.Role;
 import myproject.booktalk.user.User;
 import myproject.booktalk.user.UserRepository;
 import org.springframework.data.domain.Page;
@@ -15,7 +16,17 @@ import java.time.LocalDateTime;
 
 import static myproject.booktalk.BoardCreationRequest.Status.*;
 
-
+/**
+ * 게시판 생성 요청 서비스 구현
+ * - 요청 생성/조회/취소 (사용자)
+ * - 요청 목록/승인/반려 (관리자)
+ *
+ * 변경 사항:
+ * 1) 사용자 요청 사유는 requestReason에 저장 (rejectReason는 관리자 반려 사유)
+ * 2) 승인 시 이미 동일 책 보드가 있으면 예외 발생(InvalidRequestStateException)
+ * 3) 관리자 권한 검증 ensureAdmin 추가
+ * 4) 요청 생성 시 보드 존재하면 즉시 차단
+ */
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -36,10 +47,12 @@ public class BoardCreationRequestServiceImpl implements BoardCreationRequestServ
         User requester = userRepo.findById(requesterUserId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다. id=" + requesterUserId));
 
-        // 이미 책 게시판이 있지는 않은지 서비스단에서 추가로 검사하고 싶다면:
-        // if (boardService.existsBookDiscussionByBookId(bookId)) throw new IllegalStateException("이미 게시판 존재");
+        // 이미 해당 책 게시판 존재 여부 체크
+        if (boardService.existsBookDiscussionByBookId(bookId)) {
+            throw new InvalidRequestStateException("이미 해당 책 게시판이 존재합니다.");
+        }
 
-        // 동일 책에 PENDING 요청이 이미 있는지 체크(중복 방지)
+        // 동일 책에 PENDING 요청 존재 여부 체크
         if (requestRepo.existsByBook_IdAndStatus(bookId, PENDING)) {
             throw new DuplicateRequestException("이미 대기중인 요청이 있습니다.");
         }
@@ -48,14 +61,15 @@ public class BoardCreationRequestServiceImpl implements BoardCreationRequestServ
         r.setBook(book);
         r.setUser(requester);
         r.setStatus(PENDING);
-        r.setRejectReason(null);
         r.setRequestTime(LocalDateTime.now());
         r.setAcceptedTime(null);
         r.setAdmin(null);
-        r.setRejectReason(reason);
+        // ✅ 반려 사유는 관리자만 채움 → 처음에는 무조건 null
+        r.setRejectReason(null);
 
         return requestRepo.save(r).getId();
     }
+
 
     @Override
     public BoardCreationRequest getMyRequest(Long requestId, Long requesterUserId) {
@@ -105,20 +119,21 @@ public class BoardCreationRequestServiceImpl implements BoardCreationRequestServ
 
         User admin = userRepo.findById(adminUserId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 관리자입니다. id=" + adminUserId));
+        ensureAdmin(admin); // ✅ 관리자 권한 확인
 
         Long bookId = r.getBook().getId();
 
-        // 최종 중복 방지: 승인 직전에 보드 존재 재확인
+        // 최종 중복 방지: 승인 직전에 보드 존재 재확인 (동시성)
         if (boardService.existsBookDiscussionByBookId(bookId)) {
-            r.setStatus(REJECTED);
-            r.setRejectReason("이미 동일 책 게시판이 존재합니다.");
-            r.setAdmin(admin);
-            r.setAcceptedTime(LocalDateTime.now());
-            return null; // 혹은 이미 존재하는 보드 id를 찾아 반환하도록 정책화 가능
+            // 정책상: 예외로 알려주고 컨트롤러에서 토스트 처리
+            throw new InvalidRequestStateException("이미 동일 책 게시판이 존재합니다.");
         }
 
-        // 보드 생성(책 1:1 게시판)
-        Long boardId = boardService.createBookDiscussion(bookId, adminUserId, /*title*/ null, /*desc*/ null);
+        // 보드 생성 (제목/설명 기본값 구성 - 서비스에서 자동 생성한다면 null 전달 가능)
+        String title = r.getBook().getTitle() + " 토론";
+        String desc  = r.getBook().getTitle() + "에 대한 토론 게시판입니다.";
+        Long boardId = boardService.createBookDiscussion(bookId, adminUserId, title, desc);
+        // 요청자 소유로 만들고 싶으면 adminUserId 대신 r.getUser().getId() 전달
 
         // 요청 상태 전이
         r.setStatus(ACCEPTED);
@@ -139,11 +154,20 @@ public class BoardCreationRequestServiceImpl implements BoardCreationRequestServ
         }
         User admin = userRepo.findById(adminUserId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 관리자입니다. id=" + adminUserId));
+        ensureAdmin(admin); // ✅
 
         r.setStatus(REJECTED);
         r.setRejectReason(reason);
         r.setAdmin(admin);
         r.setAcceptedTime(LocalDateTime.now());
+    }
+
+    /* ========== 내부 유틸 ========== */
+
+    private void ensureAdmin(User u) {
+        if (u == null || u.getRole() != Role.ADMIN) { // Role enum 사용
+            throw new AccessDeniedException("관리자만 처리할 수 있습니다.");
+        }
     }
 
     /* ========== 예외 ========== */

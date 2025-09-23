@@ -32,4 +32,11 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
     Optional<Board> findForUpdate(@Param("id") Long id);
 
     Optional<Board> findByTitle(String title);
+
+    Optional<Board> findByBookIdAndBoardType(Long bookId, BoardType boardType);
+
+    default boolean existsBookDiscussionForBook(Long bookId){
+        return findByBookIdAndBoardType(bookId, BoardType.BOOK_DISCUSSION).isPresent();
+    }
+
 }

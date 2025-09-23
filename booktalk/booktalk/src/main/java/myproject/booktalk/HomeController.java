@@ -3,6 +3,7 @@ package myproject.booktalk;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import myproject.booktalk.user.Role;
 import myproject.booktalk.user.User;
 import myproject.booktalk.user.session.SessionConst;
 import org.springframework.stereotype.Controller;
@@ -16,7 +17,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class HomeController {
 
-    @GetMapping("/") 
+    @GetMapping("/")
     public String home(
             @SessionAttribute(name = SessionConst.LOGIN_USER, required = false) User loginUser,
             Model model
@@ -32,6 +33,8 @@ public class HomeController {
         // 도서 게시판: 검색 진입 전용
         BoardEntry bookBoard = new BoardEntry("book", "도서 게시판", "/book/search");
 
+        boolean isAdmin = (loginUser != null && loginUser.getRole() == Role.ADMIN);
+        model.addAttribute("isAdmin", isAdmin);
         model.addAttribute("boards", boards);
         model.addAttribute("bookBoard", bookBoard);
 
