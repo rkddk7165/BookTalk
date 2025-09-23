@@ -11,6 +11,8 @@ public class BookDto {
     private String publisher;
     private String thumbnail;
     private String isbn;
+    private Integer pages;
+
 
     public static BookDto from(KakaoBookResponse.KakaoBookDocument doc) {
         return new BookDto(
@@ -18,7 +20,8 @@ public class BookDto {
                 String.join(", ", doc.getAuthors()),
                 doc.getPublisher(),
                 doc.getThumbnail(),
-                doc.getIsbn()
+                doc.getIsbn(),
+                doc.getPages()
         );
     }
 }

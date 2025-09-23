@@ -18,6 +18,7 @@ public class KakaoBookResponse {
         private String publisher;
         private String thumbnail;
         private String isbn;
+        private Integer pages;
 
     }
 }

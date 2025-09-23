@@ -160,7 +160,7 @@ public class BoardController {
                     d.getTitle(),
                     d.getAuthor(), // DTO 구조에 맞춰 매핑
                     d.getPublisher(),
-                    0,
+                    d.getPages(),
                     d.getThumbnail(),
                     null,
                     null   // LocalDate로 변환 가능하면

@@ -4,9 +4,19 @@
     <meta charset="UTF-8">
     <title>책 검색</title>
     <link rel="stylesheet" th:href="@{/css/main.css}">
+    <style>
+        .card{margin:12px 0;padding:12px;border:1px solid #2b2b2b;border-radius:10px;background:#1b1b1b;color:#eee}
+        .btn{padding:8px 12px;border-radius:8px;border:1px solid #3a3a3a;background:#2a2a2a;color:#fff;cursor:pointer}
+        .btn.primary{background:#3b82f6;border-color:#3b82f6}
+        .btn.ghost{background:transparent}
+        .btn[disabled]{opacity:.6;cursor:not-allowed}
+        .row{display:flex;gap:12px;align-items:flex-start}
+        img.thumb{width:80px;height:auto;border-radius:6px}
+    </style>
 </head>
 <body>
-<header th:replace="fragments/navbar :: navbar"></header>
+<!-- ✅ 최신 문법 -->
+<header th:replace="~{fragments/navbar :: navbar}"></header>
 
 <section class="container">
     <!-- 검색 폼 -->
@@ -16,7 +26,6 @@
         <button class="btn" type="submit">검색</button>
     </form>
 
-
     <!-- 에러 표시 -->
     <div th:if="${error}" style="margin:8px 0;color:#c33;font-weight:600;">
         [[${error}]]
@@ -24,18 +33,32 @@
 
     <!-- 검색 결과 -->
     <div th:if="${result != null}">
-        <p th:text="'총 ' + ${result.size()} + '건'"></p>
+        <p th:text="'총 ' + ${result.size()} + '건'">총 0건</p>
 
-        <div th:each="book : ${result}" class="card" style="margin:12px 0;padding:12px;">
-            <div style="display:flex;gap:12px;">
-                <img th:if="${book.thumbnail}" th:src="${book.thumbnail}" alt="thumbnail" width="80">
+        <div th:each="book : ${result}" class="card">
+            <div class="row">
+                <img class="thumb" th:if="${book.thumbnail}" th:src="${book.thumbnail}" alt="thumbnail">
                 <div>
-                    <div><strong th:text="${book.title}"></strong></div>
-                    <div th:text="${book.author}"></div>
-                    <div th:text="${book.publisher}"></div>
-                    <a class="btn outline" th:href="@{|/boards/request?isbn=${book.isbn}|}">
-                        이 책으로 게시판 요청
-                    </a>
+                    <div><strong th:text="${book.title}">제목</strong></div>
+                    <div th:text="${book.author}">저자</div>
+                    <div th:text="${book.publisher}">출판사</div>
+
+                    <!-- ✅ 버튼에 필요한 메타를 data-*로 심어서 전달 -->
+                    <div style="margin-top:8px; display:flex; gap:8px;">
+                        <button type="button"
+                                class="btn primary"
+                                th:attr="
+                                  data-isbn=${book.isbn},
+                                  data-title=${book.title},
+                                  data-author=${book.author},
+                                  data-publisher=${book.publisher},
+                                  data-pages=${book.pages},
+                                  data-thumbnail=${book.thumbnail},
+                                "
+                                onclick="requestBoardByIsbn(this)">
+                            이 책으로 게시판 요청
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -46,5 +69,54 @@
         <p>검색 결과가 없습니다.</p>
     </div>
 </section>
+
+<script>
+    async function requestBoardByIsbn(btn){
+        const data = btn.dataset;
+        if (!data.isbn) { alert('ISBN이 없습니다.'); return; }
+        if (!confirm('정말 신청하시겠습니까?')) return;
+6
+        btn.disabled = true;
+
+        try {
+            const form = new FormData();
+            form.append('isbn', data.isbn);
+            if (data.title)       form.append('title', data.title);
+            if (data.author)      form.append('author', data.author);
+            if (data.publisher)   form.append('publisher', data.publisher);
+            if (data.pages)       form.append('pages', data.pages);
+            if (data.thumbnail)   form.append('thumbnail', data.thumbnail);
+
+            const res = await fetch('/board-requests/create-by-isbn', {
+                method: 'POST',
+                body: form
+            });
+
+            if (res.status === 401) {
+                alert('로그인이 필요합니다.');
+                btn.disabled = false;
+                return;
+            }
+            if (res.status === 409) { // 서비스에서 던지는 중복/상태 오류
+                const msg = await res.text();
+                alert(msg || '이미 처리된 요청입니다.');
+                btn.disabled = false;
+                return;
+            }
+            if (!res.ok) {
+                const text = await res.text();
+                throw new Error(text || '요청 처리 중 오류가 발생했습니다.');
+            }
+
+            alert('게시판 생성 요청이 접수되었습니다.');
+            btn.textContent = '요청됨';
+            btn.classList.remove('primary');
+            btn.classList.add('ghost');
+        } catch (e) {
+            alert(e.message);
+            btn.disabled = false;
+        }
+    }
+</script>
 </body>
 </html>

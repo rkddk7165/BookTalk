@@ -61,6 +61,13 @@
         </a>
     </div>
 
+
+    <div class="toolbar" style="margin: 16px 0;">
+        <a th:if="${!isAdmin}" class="btn primary" th:href="@{/board-requests/my}">
+            게시판 생성 요청 목록
+        </a>
+    </div>
+
     <div class="grid">
         <!-- 3개 고정 게시판 -->
         <a th:each="b : ${boards}" th:href="${b.href}" class="card">

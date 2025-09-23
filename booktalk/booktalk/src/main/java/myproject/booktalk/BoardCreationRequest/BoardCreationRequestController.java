@@ -1,7 +1,12 @@
 package myproject.booktalk.BoardCreationRequest;
 
 import lombok.RequiredArgsConstructor;
+import myproject.booktalk.book.Book;
+import myproject.booktalk.book.dto.ExternalBookPayload;
+import myproject.booktalk.book.service.BookService;
 import myproject.booktalk.user.User;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -13,22 +18,56 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class BoardCreationRequestController {
 
     private final BoardCreationRequestService requestService;
+    private final BookService bookService;
 
-    // 요청 생성
+    // (기존) bookId 기반 생성은 유지해도 되고, 이제는 ISBN 기반이 메인 흐름
     @PostMapping("/create")
-    public String create(
+    @ResponseBody
+    public ResponseEntity<?> createWithBookId(
             @RequestParam Long bookId,
-            @SessionAttribute(name = "loginUser", required = true) User loginUser,
-            RedirectAttributes ra
+            @SessionAttribute(name = "loginUser", required = false) User loginUser
     ) {
-        try {
-            Long requestId = requestService.createRequest(bookId, loginUser.getId(), null);
-            ra.addFlashAttribute("toast", "게시판 생성 요청이 등록되었습니다.");
-        } catch (RuntimeException e) {
-            ra.addFlashAttribute("toast", e.getMessage());
+        if (loginUser == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
+        requestService.createRequest(bookId, loginUser.getId(), null);
+        return ResponseEntity.ok("OK");
+    }
+
+    // ✅ ISBN 기반 생성 (검색 결과에서 바로 호출)
+    @PostMapping("/create-by-isbn")
+    @ResponseBody
+    public ResponseEntity<?> createByIsbn(
+            @RequestParam String isbn,
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false) String author,
+            @RequestParam(required = false) String publisher,
+            @RequestParam(required = false) Integer pages,
+            @RequestParam(required = false) String thumbnail,
+            @RequestParam(required = false) String description,
+            @SessionAttribute(name = "loginUser", required = false) User loginUser
+    ) {
+        if (loginUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
         }
-        // 도서 상세 페이지로 리다이렉트 (경로는 프로젝트 상황에 맞게 수정)
-        return "redirect:/book/" + bookId;
+
+        String isbn13 = bookService.normalizeIsbn(isbn);
+        ExternalBookPayload payload = new ExternalBookPayload(
+                isbn13, title, author, publisher, pages, thumbnail, description, null
+        );
+        Book book = bookService.ensureBook(isbn13, payload);
+
+        requestService.createRequest(book.getId(), loginUser.getId(), null);
+        return ResponseEntity.ok("OK");
+    }
+
+    // (선택) 예외 메시지를 깔끔하게 프론트로
+    @ExceptionHandler({
+            BoardCreationRequestServiceImpl.DuplicateRequestException.class,
+            BoardCreationRequestServiceImpl.InvalidRequestStateException.class
+    })
+    @ResponseBody
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public String handleConflict(RuntimeException e) {
+        return e.getMessage();
     }
 
     // 내 요청 목록
