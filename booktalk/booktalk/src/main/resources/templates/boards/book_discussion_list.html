@@ -1,0 +1,37 @@
+﻿<!-- src/main/resources/templates/boards/book_discussion_list.html -->
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>책 토론 게시판 목록</title>
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+    <style>
+        .wrap{max-width:1120px;margin:0 auto;padding:32px 20px}
+        .title{font-size:24px;font-weight:800;margin-bottom:16px}
+        .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
+        .card{display:block;padding:16px;border-radius:12px;border:1px solid #2b2b2b;background:#1b1b1b;color:#eee;text-decoration:none}
+        .card:hover{transform:translateY(-2px);transition:.12s;box-shadow:0 8px 24px rgba(0,0,0,.12)}
+        .card h3{margin:0 0 6px;font-size:16px;color:#fff}
+        .card p{margin:0;color:#bbb;font-size:13px}
+    </style>
+</head>
+<body>
+<header th:replace="~{fragments/navbar :: navbar}"></header>
+
+<div class="wrap">
+    <div class="title">책 토론 게시판</div>
+
+    <div class="grid">
+        <a class="card" th:each="b : ${boards}"
+           th:href="@{|/boards/book-discussion/${b.boardId}|}">
+            <h3 th:text="${b.title}">책 제목</h3>
+            <p th:text="${b.author}">저자</p>
+        </a>
+    </div>
+
+    <div th:if="${#lists.isEmpty(boards)}" style="margin-top:16px;color:#aaa;">
+        아직 생성된 책 토론 게시판이 없습니다.
+    </div>
+</div>
+</body>
+</html>

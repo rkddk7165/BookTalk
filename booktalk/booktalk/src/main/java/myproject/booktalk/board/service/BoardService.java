@@ -45,5 +45,7 @@ public interface BoardService {
 
     public BoardType getBoardType(Long boardId);
 
+    Optional<Board> findById(Long boardId);
+
 
 }

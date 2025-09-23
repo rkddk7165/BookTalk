@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import myproject.booktalk.BoardCreationRequest.BoardCreationRequestService;
 import myproject.booktalk.BoardCreationRequest.BoardCreationRequestServiceImpl;
+import myproject.booktalk.board.service.BoardQueryService;
 import myproject.booktalk.board.service.BoardService;
 import myproject.booktalk.book.Book;
 import myproject.booktalk.book.dto.ExternalBookPayload;
@@ -34,6 +35,7 @@ public class BoardController {
     private final BoardCreationRequestService requestService;
     private final BookSearchService bookSearchService;
     private final PostService postService;
+    private final BoardQueryService boardQueryService;
 
     /** 로그인 성공 후 진입: 고정 게시판 3종 + 책 검색 버튼 있는 홈 */
     @GetMapping
@@ -125,27 +127,19 @@ public class BoardController {
         return "board/" + slug; // free.html / recommend.html / quotes.html
     }
 
-    /** (선택) 책 1:1 게시판 라우팅: 승인되어 생성된 뒤 접근 */
-    @GetMapping("/book-discussion/{bookId}")
-    public String bookDiscussion(@PathVariable Long bookId, Model model) {
-        var boardOpt = boardService.getBookDiscussionByBookId(bookId);
-        if (boardOpt.isEmpty()) {
-            // 아직 미승인/미생성 상태
-            model.addAttribute("message", "해당 책의 게시판이 아직 생성되지 않았습니다.");
-            return "redirect:/books/" + bookId; // 또는 에러 페이지
-        }
-        var board = boardOpt.get();
+    @GetMapping("/book-discussion")
+    public String list(Model model) {
+        model.addAttribute("boards", boardQueryService.listBookDiscussionsSortedKo());
+        return "boards/book_discussion_list";
+    }
 
-        // 책 메타(타이틀 뷰 라벨용)
-        Optional<Book> bookOpt = Optional.ofNullable(board.getBook());
-        String bookTitle = bookOpt.map(Book::getTitle).orElse("책 게시판");
-
-        model.addAttribute("slug", "book");              // 뷰에서 book용 라벨 처리
-        model.addAttribute("boardId", board.getId());
-        model.addAttribute("boardTitle", bookTitle);
-        model.addAttribute("boardDesc", "이 책에 대한 토론 게시판입니다.");
-        model.addAttribute("boardType", BoardType.BOOK_DISCUSSION);
-        return "board/list";
+    @GetMapping("/boards/book-discussion/{boardId}")
+    public String boardHome(@PathVariable Long boardId, Model model) {
+        Board board = boardService.findById(boardId)
+                .orElseThrow(() -> new IllegalArgumentException("게시판 없음"));
+        model.addAttribute("board", board);
+        model.addAttribute("book", board.getBook()); // 필요시 책 정보도
+        return "boards/book_discussion_detail";
     }
 
     /* ===== 유틸 ===== */

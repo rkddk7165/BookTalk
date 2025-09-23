@@ -80,6 +80,12 @@
             <h3 th:text="${bookBoard.title}">도서 게시판</h3>
             <p>책을 검색해 해당 책 게시판으로 이동하거나 새로 생성합니다</p>
         </a>
+
+        <!-- ✅ 책 토론 게시판 목록으로 이동 -->
+        <a th:href="@{/boards/book-discussion}" class="card">
+            <h3>책 토론 게시판</h3>
+            <p>승인된 책 게시판을 ㄱㄴㄷ 순으로 보기</p>
+        </a>
     </div>
 </div>
 </body>

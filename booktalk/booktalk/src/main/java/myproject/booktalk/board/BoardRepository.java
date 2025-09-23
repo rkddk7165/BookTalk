@@ -1,6 +1,7 @@
 package myproject.booktalk.board;
 
 import jakarta.persistence.LockModeType;
+import myproject.booktalk.board.dto.BookDiscussionBoardItem;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
@@ -38,5 +39,15 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
     default boolean existsBookDiscussionForBook(Long bookId){
         return findByBookIdAndBoardType(bookId, BoardType.BOOK_DISCUSSION).isPresent();
     }
+
+    @Query("""
+        select new myproject.booktalk.board.dto.BookDiscussionBoardItem(
+            b.id, bk.id, coalesce(b.title, bk.title), bk.author
+        )
+        from Board b
+        join b.book bk
+        where b.boardType = :type
+    """)
+    List<BookDiscussionBoardItem> findAllBookDiscussions(@Param("type") BoardType type);
 
 }
