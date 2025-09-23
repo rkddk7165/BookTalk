@@ -140,6 +140,11 @@ public class BoardServiceImpl implements BoardService {
     }
 
 
+    public Optional<Board> findById(Long boardId){
+        return boardRepository.findById(boardId);
+    }
+
+
     /* =======================
      * 유틸/예외
      * ======================= */

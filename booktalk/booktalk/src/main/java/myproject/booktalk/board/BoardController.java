@@ -36,6 +36,7 @@ public class BoardController {
     private final BookSearchService bookSearchService;
     private final PostService postService;
     private final BoardQueryService boardQueryService;
+    private final BoardRepository boardRepository;
 
     /** 로그인 성공 후 진입: 고정 게시판 3종 + 책 검색 버튼 있는 홈 */
     @GetMapping
@@ -133,13 +134,57 @@ public class BoardController {
         return "boards/book_discussion_list";
     }
 
-    @GetMapping("/boards/book-discussion/{boardId}")
-    public String boardHome(@PathVariable Long boardId, Model model) {
-        Board board = boardService.findById(boardId)
-                .orElseThrow(() -> new IllegalArgumentException("게시판 없음"));
+    /**
+     * 책 토론 게시판 라우팅
+     * 예: /boards/book-discussion/123?tab=all&sort=latest&page=0&size=20
+     */
+    @GetMapping("/book-discussion/{boardId}")
+    public String bookDiscussionBoard(@PathVariable Long boardId,
+                                      @RequestParam(defaultValue = "all") String tab,       // all | best | notice
+                                      @RequestParam(defaultValue = "latest") String sort,   // latest | popular
+                                      @RequestParam(defaultValue = "0") int page,
+                                      @RequestParam(defaultValue = "20") int size,
+                                      Model model) {
+
+        // 1) 게시판 로드 (boardId로) + 타입 검증
+        // ※ boardService에 유사 메서드 없으면 Repository 직접 써도 됩니다.
+        var board = boardService.findById(boardId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시판입니다. id=" + boardId));
+        if (board.getBoardType() != BoardType.BOOK_DISCUSSION) {
+            throw new IllegalArgumentException("BOOK_DISCUSSION 게시판이 아닙니다. id=" + boardId);
+        }
+
+        // 2) 책 제목 기반 타이틀/설명 생성
+        String bookTitle = (board.getBook() != null && board.getBook().getTitle() != null)
+                ? board.getBook().getTitle()
+                : board.getTitle(); // fallback
+        String viewTitle = bookTitle + " 토론 게시판";
+        String viewDesc  = bookTitle + "에 대한 토론을 나눠보세요!";
+
+        // 3) 목록/공지 조회 (고정 게시판과 동일 패턴)
+        Page<PostRow> posts   = postService.listByBoard(boardId, tab, sort, page, size);
+        List<PostRow> notices = postService.notices(boardId);
+
+        // 4) 뷰 모델
         model.addAttribute("board", board);
-        model.addAttribute("book", board.getBook()); // 필요시 책 정보도
-        return "boards/book_discussion_detail";
+        model.addAttribute("book", board.getBook());
+        model.addAttribute("boardId", boardId);
+        model.addAttribute("boardTitle", viewTitle);
+        model.addAttribute("boardDesc", viewDesc);
+        model.addAttribute("boardType", BoardType.BOOK_DISCUSSION);
+
+        model.addAttribute("posts", posts.getContent());
+        model.addAttribute("page", posts);
+        model.addAttribute("notices", notices);
+
+        model.addAttribute("tab", tab);
+        model.addAttribute("sort", sort);
+
+        // 책 정보가 필요하면 함께 전달
+        model.addAttribute("book", board.getBook());
+
+        // 책 토론 게시판용 뷰 (자유게시판과 동일 레이아웃이지만 경로만 별도)
+        return "boards/book_discussion";
     }
 
     /* ===== 유틸 ===== */
