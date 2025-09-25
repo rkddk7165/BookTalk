@@ -28,4 +28,7 @@ public interface BoardCreationRequestService {
 
     /** (관리자) 반려 */
     void reject(Long requestId, Long adminUserId, String reason);
+
+    long countByUserId(Long userId);
+
 }

@@ -46,4 +46,6 @@ public interface BoardCreationRequestRepository extends JpaRepository<BoardCreat
     """)
     Page<BoardCreationRequest> findAllWithJoins(Pageable pageable);
 
+    long countByUser_Id(Long userId);
+
 }

@@ -1,4 +1,4 @@
-package myproject.booktalk;
+package myproject.booktalk.config;
 
 import lombok.RequiredArgsConstructor;
 import myproject.booktalk.user.session.LoginCheckInterceptor;

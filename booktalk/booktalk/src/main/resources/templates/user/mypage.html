@@ -4,15 +4,293 @@
     <meta charset="UTF-8">
     <title>마이 페이지 - BookTalk</title>
     <link rel="stylesheet" th:href="@{/css/main.css}">
+    <style>
+        :root{--bg:#0f0f10;--card:#16181a;--muted:#9399a1;--text:#e6e8eb;--border:#2a2e33;--primary:#3b82f6;--danger:#ef4444;--ok:#10b981}
+        body{background:var(--bg);color:var(--text);line-height:1.6}
+        .container{max-width:1060px;margin:0 auto;padding:24px 16px}
+        h2,h3{margin:0 0 8px}
+        .grid{display:grid;gap:16px}
+        .grid.cols-2{grid-template-columns:1fr 1fr}
+        .grid.cols-3{grid-template-columns:repeat(3,1fr)}
+        .card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px}
+        .row{display:flex;gap:16px;align-items:center}
+        .stack{display:flex;flex-direction:column;gap:10px}
+        .muted{color:var(--muted);font-size:.95rem}
+        .divider{height:1px;background:var(--border);margin:12px 0}
+        .btn{padding:8px 12px;border-radius:10px;border:1px solid var(--border);background:#1b1d20;color:#fff;cursor:pointer}
+        .btn.primary{background:var(--primary);border-color:var(--primary)}
+        .btn.ghost{background:transparent}
+        .btn.ok{background:var(--ok);border-color:var(--ok)}
+        .btn.danger{background:var(--danger);border-color:var(--danger)}
+        .btn[disabled]{opacity:.6;cursor:not-allowed}
+        input[type="text"],input[type="email"],input[type="password"],input[type="file"],textarea,select{
+            width:100%;padding:10px 12px;border-radius:10px;background:#101215;border:1px solid var(--border);color:var(--text)
+        }
+        label{font-weight:600;font-size:.95rem}
+        .avatar{width:88px;height:88px;border-radius:999px;object-fit:cover;border:1px solid var(--border);background:#111}
+        .stat{background:#141619;border:1px solid var(--border);padding:12px;border-radius:12px;text-align:center}
+        .stat .num{font-size:1.2rem;font-weight:800}
+        table{width:100%;border-collapse:collapse}
+        th,td{border-bottom:1px solid var(--border);padding:10px;text-align:left}
+        th{color:#cbd5e1;font-weight:700}
+        .right{display:flex;justify-content:flex-end;gap:8px}
+        .pill{display:inline-flex;align-items:center;gap:6px;padding:4px 8px;border-radius:999px;border:1px solid var(--border);background:#131518;font-size:.85rem}
+        .switch{appearance:none;width:42px;height:24px;background:#2b2f35;border-radius:999px;position:relative;outline:none;cursor:pointer;border:1px solid var(--border)}
+        .switch:checked{background:var(--primary)}
+        .switch::after{content:"";position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;transition:all .18s}
+        .switch:checked::after{left:22px}
+        @media (max-width:900px){.grid.cols-2,.grid.cols-3{grid-template-columns:1fr}.row{flex-direction:column;align-items:flex-start}}
+    </style>
 </head>
 <body>
-<header th:replace="fragments/navbar :: navbar"></header>
+<header th:replace="~{fragments/navbar :: navbar}"></header>
+
 <section class="container">
     <h2>마이 페이지</h2>
+    <p class="muted">내 계정 정보와 활동을 관리하세요.</p>
+
+    <!-- 프로필 헤더 -->
     <div class="card">
-        <p><strong>이메일:</strong> <span th:text="${user.email}">email</span></p>
-        <p><strong>닉네임:</strong> <span th:text="${user.nickname}">nickname</span></p>
+        <div class="row">
+            <img class="avatar" th:src="${user.profileImage != null} ? ${user.profileImage} : @{/img/avatar-default.png}" alt="프로필">
+            <div class="stack" style="flex:1">
+                <h3 th:text="${user.nickname}">닉네임</h3>
+                <div class="muted">
+                    <span th:text="${user.email}">email@example.com</span>
+                    <span class="pill" th:if="${user.role}" th:text="${user.role}">USER</span>
+                </div>
+                <div class="muted">가입일&nbsp;<span th:text="${#temporals.format(user.createdAt, 'yyyy.MM.dd HH:mm')}">2025.01.01 10:00</span></div>
+            </div>
+            <div class="right">
+                <a class="btn" href="/logout">로그아웃</a>
+            </div>
+        </div>
     </div>
+
+    <!-- 활동 요약 -->
+    <div class="grid cols-3" style="margin-top:16px">
+        <div class="stat"><div class="num" th:text="${stats.postCount}">0</div><div class="muted">내가 쓴 게시글</div></div>
+        <div class="stat"><div class="num" th:text="${stats.commentCount}">0</div><div class="muted">내가 쓴 댓글</div></div>
+        <div class="stat"><div class="num" th:text="${stats.boardRequestCount}">0</div><div class="muted">게시판 생성 요청</div></div>
+    </div>
+
+    <div class="grid cols-2" style="margin-top:16px">
+        <div class="card">
+            <h3>최근 게시글</h3>
+            <div class="divider"></div>
+            <table th:if="${recentPosts != null and !#lists.isEmpty(recentPosts)}">
+                <thead>
+                <tr><th>제목</th><th>게시판</th><th>날짜</th></tr>
+                </thead>
+                <tbody>
+                <tr th:each="p : ${recentPosts}"
+                    th:with="
+          isBD=${p.board.boardType == T(myproject.booktalk.board.BoardType).BOOK_DISCUSSION},
+          isFixed=${p.board.boardType == T(myproject.booktalk.board.BoardType).FIXED},
+          slug=${isFixed} ?
+                (${#strings.contains(p.board.title,'자유') ? 'free' :
+                  (#strings.contains(p.board.title,'책추천') || #strings.contains(p.board.title,'책 추천')) ? 'recommend' : 'quotes'})
+                : null
+        ">
+
+                    <!-- 제목(게시글 링크) -->
+                    <td>
+                        <!-- book-discussion: /post/{id} -->
+                        <th:block th:if="${isBD}">
+                            <a th:href="@{/post/{id}(id=${p.id})}" th:text="${p.title}">제목</a>
+                        </th:block>
+
+                        <!-- fixed: /post/{id}?slug={slug} -->
+                        <th:block th:if="${isFixed}">
+                            <a th:href="@{/post/{id}(id=${p.id}, slug=${slug})}" th:text="${p.title}">제목</a>
+                        </th:block>
+                    </td>
+
+                    <!-- 게시판 링크 -->
+                    <td>
+                        <!-- book-discussion: /boards/book-discussion/{boardId} -->
+                        <th:block th:if="${isBD}">
+                            <a th:href="@{/boards/book-discussion/{id}(id=${p.board.id})}" th:text="${p.board.title}">게시판</a>
+                        </th:block>
+
+                        <!-- fixed: /boards/{slug} -->
+                        <th:block th:if="${isFixed}">
+                            <a th:href="@{/boards/{slug}(slug=${slug})}" th:text="${p.board.title}">게시판</a>
+                        </th:block>
+                    </td>
+
+                    <td th:text="${#temporals.format(p.createdAt, 'yyyy.MM.dd HH:mm')}">2025.01.01</td>
+                </tr>
+                </tbody>
+            </table>
+            <p th:if="${recentPosts == null or #lists.isEmpty(recentPosts)}" class="muted">작성한 게시글이 없습니다.</p>
+        </div>
+
+
+
+        <div class="card">
+            <h3>최근 댓글</h3>
+            <div class="divider"></div>
+            <table th:if="${recentComments != null and !#lists.isEmpty(recentComments)}">
+                <thead>
+                <tr><th>내용</th><th>게시글</th><th>게시판</th><th>날짜</th></tr>
+                </thead>
+                <tbody>
+                <tr th:each="c : ${recentComments}"
+                    th:with="
+          isBD=${c.post.board.boardType == T(myproject.booktalk.board.BoardType).BOOK_DISCUSSION},
+          isFixed=${c.post.board.boardType == T(myproject.booktalk.board.BoardType).FIXED},
+          slug=${isFixed} ?
+                (${#strings.contains(c.post.board.title,'자유') ? 'free' :
+                  (#strings.contains(c.post.board.title,'책추천') || #strings.contains(c.post.board.title,'책 추천')) ? 'recommend' : 'quotes'})
+                : null
+        ">
+
+                    <td th:text="${#strings.abbreviate(c.content, 40)}">댓글 내용</td>
+
+                    <!-- 원문 게시글 링크 -->
+                    <td>
+                        <!-- book-discussion -->
+                        <th:block th:if="${isBD}">
+                            <a th:href="@{/post/{id}(id=${c.post.id})}" th:text="${c.post.title}">원문</a>
+                        </th:block>
+                        <!-- fixed -->
+                        <th:block th:if="${isFixed}">
+                            <a th:href="@{/post/{id}(id=${c.post.id}, slug=${slug})}" th:text="${c.post.title}">원문</a>
+                        </th:block>
+                    </td>
+
+                    <!-- 게시판 링크 -->
+                    <td>
+                        <!-- book-discussion -->
+                        <th:block th:if="${isBD}">
+                            <a th:href="@{/boards/book-discussion/{id}(id=${c.post.board.id})}" th:text="${c.post.board.title}">게시판</a>
+                        </th:block>
+                        <!-- fixed -->
+                        <th:block th:if="${isFixed}">
+                            <a th:href="@{/boards/{slug}(slug=${slug})}" th:text="${c.post.board.title}">게시판</a>
+                        </th:block>
+                    </td>
+
+                    <td th:text="${#temporals.format(c.createdAt, 'yyyy.MM.dd HH:mm')}">2025.01.01</td>
+                </tr>
+                </tbody>
+            </table>
+            <p th:if="${recentComments == null or #lists.isEmpty(recentComments)}" class="muted">작성한 댓글이 없습니다.</p>
+        </div>
+
+
+
+    </div>
+
+    <div class="grid cols-2" style="margin-top:16px">
+        <!-- 계정 설정 -->
+        <div class="card">
+            <h3>계정 설정</h3>
+            <div class="divider"></div>
+
+            <!-- 프로필 수정 -->
+            <form class="stack" th:action="@{/me/profile}" method="post" enctype="multipart/form-data" th:object="${profileForm}">
+                <div>
+                    <label for="nickname">닉네임</label>
+                    <input id="nickname" type="text" th:field="*{nickname}" th:placeholder="${user.nickname}">
+                    <div class="muted" th:if="${#fields.hasErrors('nickname')}" th:errors="*{nickname}">닉네임 오류</div>
+                </div>
+                <div>
+                    <label for="email">이메일</label>
+                    <input id="email" type="email" th:field="*{email}" th:placeholder="${user.email}">
+                    <div class="muted" th:if="${#fields.hasErrors('email')}" th:errors="*{email}">이메일 오류</div>
+                </div>
+                <div>
+                    <label for="profileImage">프로필 이미지</label>
+                    <input id="profileImage" type="file" name="profileImage" accept="image/*">
+                    <p class="muted">권장: 정사각형, 1MB 이하</p>
+                </div>
+                <div class="right"><button class="btn" type="submit">변경 사항 저장</button></div>
+            </form>
+
+            <div class="divider"></div>
+
+            <!-- 비밀번호 변경 -->
+            <form class="stack" th:action="@{/me/password}" method="post" th:object="${passwordForm}">
+                <h4>비밀번호 변경</h4>
+                <div>
+                    <label for="currentPassword">현재 비밀번호</label>
+                    <input id="currentPassword" type="password" th:field="*{currentPassword}" autocomplete="current-password">
+                    <div class="muted" th:if="${#fields.hasErrors('currentPassword')}" th:errors="*{currentPassword}">오류</div>
+                </div>
+                <div>
+                    <label for="newPassword">새 비밀번호</label>
+                    <input id="newPassword" type="password" th:field="*{newPassword}" autocomplete="new-password">
+                    <div class="muted">영문/숫자/특수문자 8자 이상</div>
+                    <div class="muted" th:if="${#fields.hasErrors('newPassword')}" th:errors="*{newPassword}">오류</div>
+                </div>
+                <div>
+                    <label for="confirmPassword">새 비밀번호 확인</label>
+                    <input id="confirmPassword" type="password" th:field="*{confirmPassword}" autocomplete="new-password">
+                    <div class="muted" th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}">오류</div>
+                </div>
+                <div class="right"><button class="btn ok" type="submit">비밀번호 변경</button></div>
+            </form>
+        </div>
+
+        <!-- 알림/개인정보 & 세션 -->
+        <div class="card">
+            <h3>알림 및 개인정보</h3>
+            <div class="divider"></div>
+            <form class="stack" th:action="@{/me/settings}" method="post" th:object="${settingsForm}">
+                <label class="row"><span>이메일 알림(댓글/멘션)</span><input class="switch" type="checkbox" th:field="*{emailNotify}"></label>
+                <label class="row"><span>좋아요/북마크 알림</span><input class="switch" type="checkbox" th:field="*{socialNotify}"></label>
+                <label class="row"><span>프로필 공개(닉네임/활동)</span><input class="switch" type="checkbox" th:field="*{profilePublic}"></label>
+                <div class="right"><button class="btn" type="submit">설정 저장</button></div>
+            </form>
+
+            <div class="divider"></div>
+        </div>
+    </div>
+
+    <!-- 게시판 생성 요청 현황 -->
+    <div class="card" style="margin-top:16px">
+        <h3>내 게시판 생성 요청</h3>
+        <div class="divider"></div>
+        <table th:if="${myBoardRequests != null and !#lists.isEmpty(myBoardRequests)}">
+            <thead><tr><th>책</th><th>상태</th><th>요청일</th><th></th></tr></thead>
+            <tbody>
+            <tr th:each="r : ${myBoardRequests}">
+                <td>
+                    <a th:href="@{'/books/' + ${r.book.id}}" th:text="${r.book.title}">책 제목</a>
+                    <div class="muted" th:text="${r.book.author}">저자</div>
+                </td>
+                <td>
+                    <span class="pill" th:text="${r.status}">PENDING</span>
+                    <span class="muted" th:if="${r.rejectReason}">/ 사유: <span th:text="${r.rejectReason}">사유</span></span>
+                </td>
+                <td th:text="${#temporals.format(r.requestTime, 'yyyy.MM.dd HH:mm')}">2025.01.01</td>
+                <td class="right">
+                    <form th:if="${r.cancellable}" th:action="@{'/board-requests/' + ${r.id} + '/cancel'}" method="post">
+                        <button class="btn" type="submit">요청 취소</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        <p th:if="${myBoardRequests == null || #lists.isEmpty(myBoardRequests)}" class="muted">진행 중인 요청이 없습니다.</p>
+    </div>
+
+    <!-- 위험 구역 -->
+    <div class="card" style="margin-top:16px;border-color:#3a1f21;background:#1a1213">
+        <h3>위험 구역</h3>
+        <p class="muted">계정 비활성화 또는 삭제는 되돌릴 수 없습니다.</p>
+        <div class="row">
+            <form action="/me/deactivate" method="post"><button class="btn" type="submit">계정 비활성화</button></form>
+            <form action="/me/delete" method="post" onsubmit="return confirm('정말로 계정을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.');">
+                <button class="btn danger" type="submit">계정 완전 삭제</button>
+            </form>
+        </div>
+    </div>
+
+    <div th:if="${toast}" class="card" style="margin-top:16px;background:#112019;border-color:#1f3d2f"><strong th:text="${toast}">저장되었습니다.</strong></div>
+    <div th:if="${error}" class="card" style="margin-top:16px;background:#2a1414;border-color:#3a1f1f"><strong th:text="${error}">에러가 발생했습니다.</strong></div>
 </section>
 </body>
 </html>

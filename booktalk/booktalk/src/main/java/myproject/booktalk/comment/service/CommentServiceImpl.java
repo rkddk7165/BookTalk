@@ -9,6 +9,7 @@ import myproject.booktalk.post.Post;
 import myproject.booktalk.post.PostRepository;
 import myproject.booktalk.user.User;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -87,6 +88,16 @@ public class CommentServiceImpl implements CommentService {
                         ch.isDeleted(), ch.getCreatedAt(), List.of()
                 )).toList()
         )).toList();
+    }
+
+    @Override
+    public long countByUserId(Long userId) {
+        return commentRepository.countByUser_Id(userId);
+    }
+
+    @Override
+    public List<Comment> findRecentByUserId(Long userId, Pageable pageable) {
+        return commentRepository.findByUser_IdOrderByCreatedAtDesc(userId, pageable);
     }
 
 }

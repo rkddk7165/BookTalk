@@ -1,6 +1,7 @@
 package myproject.booktalk.comment;
 
 import myproject.booktalk.post.Post;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -28,4 +29,8 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
 
     @EntityGraph(attributePaths = {"user", "parent", "post"})
     List<Comment> findByPostId(Long postId);
+
+    long countByUser_Id(Long userId);
+
+    List<Comment> findByUser_IdOrderByCreatedAtDesc(Long userId, Pageable pageable);
 }

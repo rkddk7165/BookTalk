@@ -12,6 +12,7 @@ import myproject.booktalk.user.UserRepository;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -170,6 +171,16 @@ public class PostServiceImpl implements PostService {
         }
 
         postRepository.incrementDislikeCount(postId);
+    }
+
+    @Override
+    public long countByUserId(Long userId) {
+        return postRepository.countByUser_Id(userId);
+    }
+
+    @Override
+    public List<Post> findRecentByUserId(Long userId, Pageable pageable) {
+        return postRepository.findByUser_IdOrderByCreatedAtDesc(userId, pageable);
     }
 
     /* ===================== 리스트(고정 게시판) ===================== */

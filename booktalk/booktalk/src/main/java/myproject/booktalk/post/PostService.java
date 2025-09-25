@@ -27,4 +27,8 @@ public interface PostService {
     // 리스트(고정 게시판)
     Page<PostRow> listByBoard(Long boardId, String tab, String sort, int page, int size);
     List<PostRow> notices(Long boardId);
+
+    long countByUserId(Long id);
+    List<?> findRecentByUserId(Long userId, org.springframework.data.domain.Pageable pageable);
+
 }

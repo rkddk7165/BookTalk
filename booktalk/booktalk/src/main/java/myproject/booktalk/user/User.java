@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
+
 
 @Entity
 @Getter @Setter
@@ -33,6 +35,8 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Role role = Role.USER;
 
+    private boolean active = true;
+
     public User(){};
 
     public User(String email, String nickname, String profileImage, Host host, String snsId) {
@@ -42,5 +46,7 @@ public class User {
         this.snsId = null;
         this.password = ""; // 소셜 로그인은 패스워드 비움
     }
+
+    private LocalDate createdAt = LocalDate.now();
 
 }

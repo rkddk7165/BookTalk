@@ -86,6 +86,10 @@ public interface PostRepository extends JpaRepository<Post, Long> {
            """)
     Optional<Post> findDetail(Long postId);
 
+    long countByUser_Id(Long userId);
+
+    List<Post> findByUser_IdOrderByCreatedAtDesc(Long userId, Pageable pageable);
+
     /* ===== 카운터/락 ===== */
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select p from Post p where p.id = :postId")

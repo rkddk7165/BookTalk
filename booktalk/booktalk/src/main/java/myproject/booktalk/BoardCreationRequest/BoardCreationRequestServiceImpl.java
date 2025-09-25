@@ -162,6 +162,11 @@ public class BoardCreationRequestServiceImpl implements BoardCreationRequestServ
         r.setAcceptedTime(LocalDateTime.now());
     }
 
+    @Override
+    public long countByUserId(Long userId) {
+        return requestRepo.countByUser_Id(userId);
+    }
+
     /* ========== 내부 유틸 ========== */
 
     private void ensureAdmin(User u) {
