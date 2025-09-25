@@ -1,7 +1,9 @@
 package myproject.booktalk.user;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import myproject.booktalk.user.controller.UserViewController;
+import myproject.booktalk.user.dto.JoinRequest;
 import myproject.booktalk.user.exception.UserException;
 import myproject.booktalk.usersettings.UserSettings;
 import myproject.booktalk.usersettings.UserSettingsRepository;
@@ -18,6 +20,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -28,35 +31,34 @@ public class UserService {
 
     private static final Path UPLOAD_ROOT = Paths.get("uploads/profile"); // 프로젝트 루트 기준
 
-    /**
-     * 회원가입
-     */
-    public Long join(User user) {
+    /** 회원가입 */
+    public Long join(JoinRequest req) {
+        // 이메일 중복 체크
+        if (userRepository.existsByEmailAndHost(req.getEmail().trim().toLowerCase(), Host.LOCAL)) {
+            throw new UserException("DUP_EMAIL", 400, "이미 가입된 이메일입니다.");
+        }
 
+        User user = new User();
+        user.setEmail(req.getEmail().trim().toLowerCase());
+        user.setNickname(req.getNickname().trim());
+        user.setPassword(passwordEncoder.encode(req.getPassword().trim())); // ✅ 여기서 해시
+        user.setProfileImage(req.getProfileImage());
         user.setHost(Host.LOCAL);
-        user.setSnsId(null);
-        User savedUser = userRepository.save(user);
+        user.setRole(Role.USER);
 
-        return savedUser.getId();
+        return userRepository.save(user).getId();
     }
 
 
-    public User login(String email, String password) {
-        User findUser = userRepository.findByEmailAndHost(email, Host.LOCAL)
-                .orElseThrow(() -> new UserException(
-                        "USER_NOT_FOUND",
-                        400,
-                        "존재하지 않는 사용자입니다."
-                ));
+    /** 로그인  */
+    public User login(String email, String rawPassword) {
+        User u = userRepository.findByEmailAndHost(email.trim().toLowerCase(), Host.LOCAL)
+                .orElseThrow(() -> new UserException("USER_NOT_FOUND", 400, "존재하지 않는 사용자입니다."));
 
-        if(!findUser.getPassword().equals(password)) {
-            throw new UserException(
-                    "INVALID_PASSWORD",
-                    400,
-                    "비밀번호가 일치하지 않습니다."
-            );
+        if (!passwordEncoder.matches(rawPassword, u.getPassword())) { // ✅ matches 사용
+            throw new UserException("INVALID_PASSWORD", 400, "비밀번호가 일치하지 않습니다.");
         }
-        return findUser;
+        return u;
     }
     /**
      * 전체 회원 조회
@@ -91,14 +93,13 @@ public class UserService {
     public void changePassword(Long userId, String currentPw, String newPw) {
         User u = userRepository.findById(userId).orElseThrow();
         String hash = u.getPassword();
+
         if (hash != null && !hash.isBlank()) {
             if (!passwordEncoder.matches(currentPw, hash)) {
+                log.info("Current password = {}", currentPw);
+                log.info("New password = {}", newPw);
+                log.info("real password = {}", hash);
                 throw new BadCredentialException("현재 비밀번호가 올바르지 않습니다.");
-            }
-        } else {
-            // 기존에 비번이 없던(소셜 계정 등) 케이스면 currentPw 체크 스킵
-            if (currentPw != null && !currentPw.isBlank()) {
-                // 입력했는데 매칭 불가 → 그냥 무시
             }
         }
         u.setPassword(passwordEncoder.encode(newPw));

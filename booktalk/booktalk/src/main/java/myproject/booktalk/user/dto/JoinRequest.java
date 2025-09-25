@@ -6,16 +6,13 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import myproject.booktalk.user.Host;
-import myproject.booktalk.user.Role;
-import myproject.booktalk.user.User;
+
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class JoinRequest {
-
-    @Email
+    @Email @NotBlank
     private String email;
 
     @NotBlank
@@ -25,20 +22,5 @@ public class JoinRequest {
     private String password;
 
     private String profileImage;
-
-
-    /**
-     *     Entity로 변환 편의 메소드
-     */
-    public User toEntity() {
-        User user = new User();
-        user.setEmail(this.email);
-        user.setNickname(this.nickname);
-        user.setPassword(this.password);
-        user.setProfileImage(this.profileImage);
-        user.setHost(Host.LOCAL);
-        user.setRole(Role.USER);
-
-        return user;
-    }
 }
+

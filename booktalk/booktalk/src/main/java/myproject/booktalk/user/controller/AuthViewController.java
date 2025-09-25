@@ -75,16 +75,20 @@ public class AuthViewController {
     }
 
     @PostMapping("/join")
-    public String join(@Valid @ModelAttribute("joinRequest") JoinRequest form,
-                       BindingResult bindingResult,
+    public String join(@Valid @ModelAttribute("joinRequest") JoinRequest req,
+                       BindingResult binding,
                        RedirectAttributes ra) {
-        if (bindingResult.hasErrors()) return "auth/join";
-
-        User joinUser = form.toEntity();
-
-        userService.join(joinUser);
-        ra.addAttribute("email", form.getEmail());
-        return "redirect:/login";
+        if (binding.hasErrors()) {
+            return "auth/join";
+        }
+        try {
+            userService.join(req);
+            ra.addFlashAttribute("toast", "가입이 완료되었습니다. 로그인해 주세요.");
+            return "redirect:/login";
+        } catch (UserException e) {
+            binding.rejectValue("email", "duplicate", e.getMessage());
+            return "auth/join";
+        }
     }
 
     @PostMapping("/logout")

@@ -1,3 +1,4 @@
+/*
 package myproject.booktalk.user.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -81,3 +82,4 @@ public class UserApiController {
         return ResponseEntity.ok(UserDto.from(kakaoUser));
     }
 }
+*/

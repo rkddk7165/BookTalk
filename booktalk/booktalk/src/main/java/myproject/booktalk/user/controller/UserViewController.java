@@ -118,33 +118,45 @@ public class UserViewController {
     @PostMapping("/me/password")
     public String changePassword(
             @SessionAttribute(name = SessionConst.LOGIN_USER, required = false) User loginUser,
-            @Valid @ModelAttribute("passwordForm") PasswordForm form,
-            BindingResult binding,
+            @Valid @ModelAttribute("passwordForm") UserViewController.PasswordForm form,
+            BindingResult binding, // ⚠️ 반드시 @ModelAttribute 바로 다음에!
             RedirectAttributes ra
     ) {
         if (loginUser == null) return "redirect:/login?redirect=/me";
 
-        if (!form.getNewPassword().equals(form.getConfirmPassword())) {
+        // 1) 기본 검증
+        if (form.getNewPassword() == null || form.getNewPassword().length() < 8) {
+            binding.rejectValue("newPassword", "size", "새 비밀번호는 8자 이상이어야 합니다.");
+        }
+        if (form.getConfirmPassword() == null || !form.getConfirmPassword().equals(form.getNewPassword())) {
             binding.rejectValue("confirmPassword", "mismatch", "새 비밀번호가 일치하지 않습니다.");
         }
 
+        // 에러가 있으면 플래시로 되돌리기
         if (binding.hasErrors()) {
             ra.addFlashAttribute("org.springframework.validation.BindingResult.passwordForm", binding);
             ra.addFlashAttribute("passwordForm", form);
-            ra.addFlashAttribute("error", "비밀번호 변경에 실패했습니다.");
+            ra.addFlashAttribute("error", "비밀번호 변경에 실패했습니다. 입력을 확인하세요.");
             return "redirect:/me?tab=account";
         }
 
+        // 2) 서비스 호출
         try {
             userService.changePassword(loginUser.getId(), form.getCurrentPassword(), form.getNewPassword());
             ra.addFlashAttribute("toast", "비밀번호가 변경되었습니다.");
+            return "redirect:/me?tab=account";
         } catch (BadCredentialException e) {
-            ra.addFlashAttribute("error", "현재 비밀번호가 올바르지 않습니다.");
+            // 현재 비밀번호 틀림 → 필드 에러로 다시 보내기
+            binding.rejectValue("currentPassword", "badCurrent", "현재 비밀번호가 올바르지 않습니다.");
+            ra.addFlashAttribute("org.springframework.validation.BindingResult.passwordForm", binding);
+            ra.addFlashAttribute("passwordForm", form);
+            return "redirect:/me?tab=account";
         } catch (Exception e) {
             ra.addFlashAttribute("error", "비밀번호 변경 중 오류가 발생했습니다.");
+            return "redirect:/me?tab=account";
         }
-        return "redirect:/me?tab=account";
     }
+
 
     /** 알림/개인정보 설정 저장 */
     @PostMapping("/me/settings")
