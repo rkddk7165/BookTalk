@@ -211,7 +211,7 @@ public class UserViewController {
         if (loginUser == null) return "redirect:/login?redirect=/me";
         userService.deleteAccount(loginUser.getId());
         // 세션 무효화 & 로그아웃 경로로
-        return "redirect:/logout";
+        return "redirect:/login";
     }
 
     /* ---------- DTOs ---------- */
