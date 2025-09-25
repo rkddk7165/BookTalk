@@ -123,6 +123,11 @@ public class BoardServiceImpl implements BoardService {
                 .orElseThrow(() -> new IllegalArgumentException("게시판이 없음: " + boardId));
     }
 
+    @Override
+    public Optional<Long> findBookDiscussionBoardIdByBookId(Long bookId) {
+        return boardRepository.findIdByBoardTypeAndBookId(BoardType.BOOK_DISCUSSION, bookId);
+    }
+
 
     /* =======================
      * 공통

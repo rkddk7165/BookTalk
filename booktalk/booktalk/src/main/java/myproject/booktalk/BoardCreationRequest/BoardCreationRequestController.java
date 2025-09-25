@@ -1,6 +1,7 @@
 package myproject.booktalk.BoardCreationRequest;
 
 import lombok.RequiredArgsConstructor;
+import myproject.booktalk.board.service.BoardService;
 import myproject.booktalk.book.Book;
 import myproject.booktalk.book.dto.ExternalBookPayload;
 import myproject.booktalk.book.service.BookService;
@@ -12,6 +13,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.Map;
+
 @Controller
 @RequestMapping("/board-requests")
 @RequiredArgsConstructor
@@ -19,6 +22,7 @@ public class BoardCreationRequestController {
 
     private final BoardCreationRequestService requestService;
     private final BookService bookService;
+    private final BoardService boardService;
 
     // (기존) bookId 기반 생성은 유지해도 되고, 이제는 ISBN 기반이 메인 흐름
     @PostMapping("/create")
@@ -32,7 +36,6 @@ public class BoardCreationRequestController {
         return ResponseEntity.ok("OK");
     }
 
-    // ✅ ISBN 기반 생성 (검색 결과에서 바로 호출)
     @PostMapping("/create-by-isbn")
     @ResponseBody
     public ResponseEntity<?> createByIsbn(
@@ -46,7 +49,7 @@ public class BoardCreationRequestController {
             @SessionAttribute(name = "loginUser", required = false) User loginUser
     ) {
         if (loginUser == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message","로그인이 필요합니다."));
         }
 
         String isbn13 = bookService.normalizeIsbn(isbn);
@@ -55,8 +58,17 @@ public class BoardCreationRequestController {
         );
         Book book = bookService.ensureBook(isbn13, payload);
 
+        // ✅ 보드 존재 여부 선확인
+        var existingBoardId = boardService.findBookDiscussionBoardIdByBookId(book.getId());
+        if (existingBoardId.isPresent()) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of(
+                    "message", "이미 해당 책 게시판이 존재합니다.",
+                    "boardId", existingBoardId.get()
+            ));
+        }
+
         requestService.createRequest(book.getId(), loginUser.getId(), null);
-        return ResponseEntity.ok("OK");
+        return ResponseEntity.ok(Map.of("message","OK"));
     }
 
     // (선택) 예외 메시지를 깔끔하게 프론트로

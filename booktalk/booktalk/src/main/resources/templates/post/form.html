@@ -29,6 +29,10 @@
     </style>
 </head>
 <body>
+
+<!-- 네비게이션: 로그인 페이지와 동일하게 header + th:replace -->
+<header th:replace="fragments/navbar :: navbar"></header>
+
 <div class="page">
     <h2 th:text="${post != null} ? '글 수정하기' : '새 글쓰기'"></h2>
 

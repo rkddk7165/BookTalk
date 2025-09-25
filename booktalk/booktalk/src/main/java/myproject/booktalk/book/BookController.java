@@ -5,6 +5,8 @@ import myproject.booktalk.BoardCreationRequest.BoardCreationRequestService;
 import myproject.booktalk.board.service.BoardService;
 import myproject.booktalk.book.dto.ExternalBookPayload;
 import myproject.booktalk.book.service.BookService;
+import myproject.booktalk.user.User;
+import myproject.booktalk.user.session.SessionConst;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -51,14 +53,15 @@ public class BookController {
                                @RequestParam(required = false) String publisher,
                                @RequestParam(required = false) Integer pages,
                                @RequestParam(required = false) String thumbnail,
-                               @RequestParam(required = false) String description) {
+                               @RequestParam(required = false) String description,
+                               @SessionAttribute(name = SessionConst.LOGIN_USER) User loginUser) {
         String isbn13 = bookService.normalizeIsbn(isbn);
         ExternalBookPayload payload = new ExternalBookPayload(
                 isbn13, title, author, publisher, pages, thumbnail, description, null
         );
         Book book = bookService.ensureBook(isbn13, payload);
 
-        Long requesterId = /* TODO: 로그인 유저 ID */ null;
+        Long requesterId = loginUser.getId();
         requestService.createRequest(book.getId(), requesterId, "사용자 요청");
         return "redirect:/books/" + isbn13 + "?requested=1";
     }

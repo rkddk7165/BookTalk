@@ -35,6 +35,9 @@ public class BookSearchController {
                 .toList());
 
         var result = bookSearchService.searchBooks(query.trim());
+
+        log.info(result.toString());
+
         model.addAttribute("result", result);
         model.addAttribute("q", query);
         return "book/search";

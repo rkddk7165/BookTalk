@@ -47,5 +47,8 @@ public interface BoardService {
 
     Optional<Board> findById(Long boardId);
 
+    /** 책 기반 book-discussion 보드가 있으면 그 ID를 돌려줌 */
+    Optional<Long> findBookDiscussionBoardIdByBookId(Long bookId);
+
 
 }

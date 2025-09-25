@@ -15,6 +15,9 @@
     </style>
 </head>
 <body>
+<!-- 네비게이션: 로그인 페이지와 동일하게 header + th:replace -->
+<header th:replace="fragments/navbar :: navbar"></header>
+
 <div class="page">
     <div class="title">
         <span th:text="${book.title} ?: '제목 정보 없음'">제목</span>

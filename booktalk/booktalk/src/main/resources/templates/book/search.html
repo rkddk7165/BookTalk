@@ -12,17 +12,18 @@
         .btn[disabled]{opacity:.6;cursor:not-allowed}
         .row{display:flex;gap:12px;align-items:flex-start}
         img.thumb{width:80px;height:auto;border-radius:6px}
+        .container{max-width:980px;margin:0 auto;padding:16px}
+        input[type="text"]{flex:1;padding:8px 10px;border-radius:8px;border:1px solid #3a3a3a;background:#121212;color:#eee}
     </style>
 </head>
 <body>
-<!-- ✅ 최신 문법 -->
 <header th:replace="~{fragments/navbar :: navbar}"></header>
 
 <section class="container">
     <!-- 검색 폼 -->
     <form th:action="@{/books/search}" method="get" accept-charset="UTF-8"
           style="display:flex;gap:8px;margin-bottom:16px;">
-        <input type="text" name="query" th:value="${q}" placeholder="책 제목/저자/ISBN">
+        <input type="text" name="query" th:value="${q}" placeholder="책 제목/저자/ISBN" autocomplete="off">
         <button class="btn" type="submit">검색</button>
     </form>
 
@@ -43,7 +44,7 @@
                     <div th:text="${book.author}">저자</div>
                     <div th:text="${book.publisher}">출판사</div>
 
-                    <!-- ✅ 버튼에 필요한 메타를 data-*로 심어서 전달 -->
+                    <!-- 버튼에 필요한 메타를 data-*로 전달 -->
                     <div style="margin-top:8px; display:flex; gap:8px;">
                         <button type="button"
                                 class="btn primary"
@@ -53,7 +54,7 @@
                                   data-author=${book.author},
                                   data-publisher=${book.publisher},
                                   data-pages=${book.pages},
-                                  data-thumbnail=${book.thumbnail},
+                                  data-thumbnail=${book.thumbnail}
                                 "
                                 onclick="requestBoardByIsbn(this)">
                             이 책으로 게시판 요청
@@ -75,45 +76,72 @@
         const data = btn.dataset;
         if (!data.isbn) { alert('ISBN이 없습니다.'); return; }
         if (!confirm('정말 신청하시겠습니까?')) return;
-6
+
         btn.disabled = true;
 
         try {
             const form = new FormData();
             form.append('isbn', data.isbn);
-            if (data.title)       form.append('title', data.title);
-            if (data.author)      form.append('author', data.author);
-            if (data.publisher)   form.append('publisher', data.publisher);
-            if (data.pages)       form.append('pages', data.pages);
-            if (data.thumbnail)   form.append('thumbnail', data.thumbnail);
+            if (data.title)     form.append('title', data.title);
+            if (data.author)    form.append('author', data.author);
+            if (data.publisher) form.append('publisher', data.publisher);
+            if (data.pages)     form.append('pages', data.pages);
+            if (data.thumbnail) form.append('thumbnail', data.thumbnail);
 
             const res = await fetch('/board-requests/create-by-isbn', {
                 method: 'POST',
                 body: form
             });
 
+            // 미인증
             if (res.status === 401) {
-                alert('로그인이 필요합니다.');
+                const text = await res.text().catch(()=>null);
+                alert(text || '로그인이 필요합니다.');
                 btn.disabled = false;
                 return;
             }
-            if (res.status === 409) { // 서비스에서 던지는 중복/상태 오류
-                const msg = await res.text();
-                alert(msg || '이미 처리된 요청입니다.');
-                btn.disabled = false;
+
+            // 중복/상태 충돌: 서버가 boardId를 함께 내려줌
+            if (res.status === 409) {
+                // 컨트롤러에서 Map 형태(JSON)로 내려주므로 JSON 우선 시도, 실패 시 텍스트로 폴백
+                let payload = {};
+                const contentType = res.headers.get('Content-Type') || '';
+                if (contentType.includes('application/json')) {
+                    payload = await res.json().catch(()=>({}));
+                } else {
+                    const msg = await res.text().catch(()=> '');
+                    payload.message = msg;
+                }
+
+                const message = (payload && payload.message) ? payload.message : '이미 해당 책 게시판이 존재합니다.';
+                if (payload && payload.boardId) {
+                    if (confirm(message + '\n해당 게시판으로 이동하시겠습니까?')) {
+                        location.href = '/boards/book-discussion/' + payload.boardId;
+                    } else {
+                        // 아니오 → 현재 페이지 유지
+                        btn.disabled = false;
+                    }
+                } else {
+                    // boardId가 없으면 기존처럼 알림만
+                    alert(message);
+                    btn.disabled = false;
+                }
                 return;
             }
+
+            // 기타 오류
             if (!res.ok) {
-                const text = await res.text();
+                const text = await res.text().catch(()=>null);
                 throw new Error(text || '요청 처리 중 오류가 발생했습니다.');
             }
 
+            // 성공
             alert('게시판 생성 요청이 접수되었습니다.');
             btn.textContent = '요청됨';
             btn.classList.remove('primary');
             btn.classList.add('ghost');
         } catch (e) {
-            alert(e.message);
+            alert(e.message || '알 수 없는 오류가 발생했습니다.');
             btn.disabled = false;
         }
     }

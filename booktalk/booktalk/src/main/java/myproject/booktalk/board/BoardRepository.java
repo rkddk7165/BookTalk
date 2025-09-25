@@ -50,4 +50,11 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
     """)
     List<BookDiscussionBoardItem> findAllBookDiscussions(@Param("type") BoardType type);
 
+    boolean existsByBoardTypeAndWorkKey(BoardType boardType, String workKey);
+
+    Optional<Board> findByBoardTypeAndWorkKey(BoardType boardType, String workKey);
+
+    @Query("select b.id from Board b where b.boardType = :type and b.book.id = :bookId")
+    Optional<Long> findIdByBoardTypeAndBookId(@Param("type") BoardType type, @Param("bookId") Long bookId);
+
 }

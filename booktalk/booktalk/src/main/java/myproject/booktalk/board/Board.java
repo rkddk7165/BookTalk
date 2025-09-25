@@ -34,6 +34,9 @@ public class Board {
 
     private LocalDateTime createdAt;
 
+    @Column(name = "work_key")
+    private String workKey;
+
 
 
 }
