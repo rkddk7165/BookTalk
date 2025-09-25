@@ -109,6 +109,7 @@ public class UserViewController {
             imageUrl = userService.uploadProfileImage(loginUser.getId(), profileImage);
         }
 
+        loginUser.setProfileImage(imageUrl);
         userService.updateProfile(loginUser.getId(), form.getEmail(), form.getNickname(), imageUrl);
         ra.addFlashAttribute("toast", "프로필이 저장되었습니다.");
         return "redirect:/me?tab=account";

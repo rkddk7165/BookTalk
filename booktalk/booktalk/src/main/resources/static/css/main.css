@@ -18,3 +18,39 @@ label { color: var(--muted); font-weight:600; font-size: 14px; }
 .card { padding:16px; background:var(--card); border:1px solid var(--line); border-radius:16px; }
 .field-error { color:#ffb3b8; font-size:12px; }
 .footer { text-align:center; color:var(--muted); padding: 32px 0; border-top:1px solid var(--line); margin-top: 40px; }
+/* 상단바 오른쪽 영역을 플렉스로 정렬 */
+.nav-right{
+    display:flex;
+    align-items:center;     /* 수직 가운데 정렬 */
+    gap:10px;               /* 요소 간 간격 */
+}
+
+/* 아바타 크기/정렬 */
+.avatar-sm{
+    width:28px;
+    height:28px;
+    border-radius:999px;
+    object-fit:cover;
+    display:block;          /* baseline 영향 제거 */
+    border:1px solid #2a2e33;
+}
+
+/* 텍스트가 버튼/이미지와 높이 맞도록 */
+.welcome{
+    line-height:1;          /* 높이 튀는 것 방지 */
+    display:inline-block;
+}
+
+/* 네비게이션 버튼(작게, 세로 정렬 고정) */
+.btn.nav{
+    padding:8px 12px;
+    border-radius:10px;
+    border:1px solid #2a2e33;
+    background:#1b1d20;
+    color:#fff;
+    text-decoration:none;
+    display:inline-flex;     /* 텍스트 중앙 정렬 */
+    align-items:center;
+    height:32px;             /* 아바타 높이와 비슷하게 */
+}
+.btn.nav:hover{ background:#24272c; }

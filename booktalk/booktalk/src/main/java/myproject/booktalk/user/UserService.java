@@ -42,7 +42,6 @@ public class UserService {
         user.setEmail(req.getEmail().trim().toLowerCase());
         user.setNickname(req.getNickname().trim());
         user.setPassword(passwordEncoder.encode(req.getPassword().trim())); // ✅ 여기서 해시
-        user.setProfileImage(req.getProfileImage());
         user.setHost(Host.LOCAL);
         user.setRole(Role.USER);
 

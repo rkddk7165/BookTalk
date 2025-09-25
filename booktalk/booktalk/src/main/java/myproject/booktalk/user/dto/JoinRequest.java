@@ -3,6 +3,7 @@ package myproject.booktalk.user.dto;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -18,9 +19,18 @@ public class JoinRequest {
     @NotBlank
     private String nickname;
 
-    @NotBlank
+    @NotBlank @Size(min = 8, max = 24)
     private String password;
 
-    private String profileImage;
+    @NotBlank
+    private String confirmPassword;
+
+    private String profileImageUrl;
+
+    private Boolean marketingOptIn = false;
+
+    @NotNull private Boolean agreeTerms;
+    @NotNull private Boolean agreePrivacy;
+    @NotNull private Boolean over14;
 }
 

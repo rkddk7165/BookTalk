@@ -52,7 +52,11 @@
     <!-- 프로필 헤더 -->
     <div class="card">
         <div class="row">
-            <img class="avatar" th:src="${user.profileImage != null} ? ${user.profileImage} : @{/img/avatar-default.png}" alt="프로필">
+            <!-- 기본 이미지: /img/avatar-default.png 를 static에 넣어두세요 -->
+            <img class="avatar-lg"
+                 th:src="${user.profileImage} != null ? ${user.profileImage} : @{/img/avatar-default.png}"
+                 alt="프로필" style="width:96px;height:96px;border-radius:999px;object-fit:cover;border:1px solid #2a2e33;">
+
             <div class="stack" style="flex:1">
                 <h3 th:text="${user.nickname}">닉네임</h3>
                 <div class="muted">
@@ -204,7 +208,7 @@
                 <div>
                     <label for="profileImage">프로필 이미지</label>
                     <input id="profileImage" type="file" name="profileImage" accept="image/*">
-                    <p class="muted">권장: 정사각형, 1MB 이하</p>
+                    <p class="muted">권장: 정사각형, 2MB 이하</p>
                 </div>
                 <div class="right"><button class="btn" type="submit">변경 사항 저장</button></div>
             </form>

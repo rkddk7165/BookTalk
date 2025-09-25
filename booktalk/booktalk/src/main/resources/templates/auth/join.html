@@ -4,32 +4,260 @@
     <meta charset="UTF-8">
     <title>회원가입 - BookTalk</title>
     <link rel="stylesheet" th:href="@{/css/main.css}">
+    <style>
+        :root{--danger:#ef4444;--ok:#10b981;--border:#2a2e33;--muted:#9aa2ac;--text:#e6e8eb}
+        .form-container{max-width:520px;margin:28px auto;padding:0 16px}
+        .form-field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+        input[type="email"],input[type="text"],input[type="password"],input[type="file"]{
+            width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:#101215;color:var(--text);outline:none
+        }
+        input.invalid{border-color:var(--danger)}
+        .field-error{margin-top:4px;color:var(--danger);font-size:.9rem;min-height:1.1em}
+        .muted{color:var(--muted);font-size:.9rem}
+        .pw-wrap{position:relative}
+        .pw-toggle{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:.9rem;cursor:pointer;color:#cbd5e1}
+        .meter{height:8px;border-radius:6px;background:#0f1114;border:1px solid var(--border);overflow:hidden}
+        .meter>span{display:block;height:100%;width:0%;background:var(--danger);transition:width .2s}
+        .meter.ok>span{background:var(--ok)}
+        .actions{display:flex;gap:10px;align-items:center;margin-top:8px}
+        .btn{padding:10px 14px;border-radius:10px;border:1px solid var(--border);background:#1b1d20;color:#fff;cursor:pointer}
+        .btn.primary{background:#3b82f6;border-color:#3b82f6}
+        .btn[disabled]{opacity:.6;cursor:not-allowed}
+        /* 접근성: 실시간 오류 공지 */
+        .sr-live{position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden}
+    </style>
 </head>
 <body>
-<header th:replace="fragments/navbar :: navbar"></header>
+<header th:replace="~{fragments/navbar :: navbar}"></header>
+
 <section class="form-container">
     <h2>회원가입</h2>
-    <form th:action="@{/join}" th:object="${joinRequest}" method="post">
+
+    <form id="joinForm" th:action="@{/join}" th:object="${joinRequest}" method="post" enctype="multipart/form-data" novalidate>
+        <!-- 이메일 -->
         <div class="form-field">
-            <label for="email">이메일</label>
-            <input id="email" type="email" th:field="*{email}" required>
-            <div class="field-error" th:errors="*{email}">이메일 에러</div>
+            <label for="email">이메일 *</label>
+            <input id="email" name="email" type="email" th:field="*{email}"
+                   autocomplete="email" placeholder="you@example.com" required>
+            <div id="emailError" class="field-error" aria-live="polite"></div>
+        </div>
+
+        <!-- 닉네임 -->
+        <div class="form-field">
+            <label for="nickname">닉네임 *</label>
+            <input id="nickname" name="nickname" type="text" th:field="*{nickname}"
+                   autocomplete="nickname" minlength="2" maxlength="20" required placeholder="2~20자">
+            <div id="nicknameError" class="field-error" aria-live="polite"></div>
+        </div>
+
+        <!-- 비밀번호 -->
+        <div class="form-field">
+            <label for="password">비밀번호 *</label>
+            <div class="pw-wrap">
+                <input id="password" name="password" type="password" th:field="*{password}"
+                       autocomplete="new-password" minlength="8" required placeholder="영문/숫자/특수문자 조합 권장">
+                <span class="pw-toggle" onclick="togglePw('password')">표시</span>
+            </div>
+            <div class="meter" id="pwMeter"><span></span></div>
+            <div id="passwordError" class="field-error" aria-live="polite"></div>
+        </div>
+
+        <!-- 비밀번호 확인 -->
+        <div class="form-field">
+            <label for="confirmPassword">비밀번호 확인 *</label>
+            <div class="pw-wrap">
+                <input id="confirmPassword" name="confirmPassword" type="password" th:field="*{confirmPassword}"
+                       autocomplete="new-password" required>
+                <span class="pw-toggle" onclick="togglePw('confirmPassword')">표시</span>
+            </div>
+            <div id="confirmError" class="field-error" aria-live="polite"></div>
+        </div>
+
+        <!-- 프로필 이미지 (선택) -->
+        <div class="form-field">
+            <label for="profileImage">프로필 이미지 (선택)</label>
+            <input id="profileImage" type="file" name="profileImage" accept="image/*">
+            <div class="muted">정사각형 권장, 1MB 이하</div>
+        </div>
+
+        <!-- 동의 -->
+        <div class="form-field">
+            <label>
+                <input type="checkbox" name="over14" th:field="*{over14}" required>
+                만 14세 이상입니다.
+            </label>
+            <div id="over14Error" class="field-error" aria-live="polite"></div>
         </div>
         <div class="form-field">
-            <label for="nickname">닉네임</label>
-            <input id="nickname" type="text" th:field="*{nickname}" required>
-            <div class="field-error" th:errors="*{nickname}">닉네임 에러</div>
+            <label>
+                <input type="checkbox" name="agreeTerms" th:field="*{agreeTerms}" required>
+                이용약관에 동의합니다. <a th:href="@{/terms}" target="_blank" rel="noopener">약관 보기</a>
+            </label>
+            <div id="agreeTermsError" class="field-error" aria-live="polite"></div>
         </div>
         <div class="form-field">
-            <label for="password">비밀번호</label>
-            <input id="password" type="password" th:field="*{password}" required>
-            <div class="field-error" th:errors="*{password}">비밀번호 에러</div>
+            <label>
+                <input type="checkbox" name="agreePrivacy" th:field="*{agreePrivacy}" required>
+                개인정보 처리방침에 동의합니다. <a th:href="@{/privacy}" target="_blank" rel="noopener">자세히</a>
+            </label>
+            <div id="agreePrivacyError" class="field-error" aria-live="polite"></div>
         </div>
+
         <div class="actions">
-            <button type="submit" class="btn">가입하기</button>
-            <a class="btn outline" th:href="@{/login}">이미 계정이 있어요</a>
+            <button id="submitBtn" type="submit" class="btn primary">가입하기</button>
+            <a class="btn" th:href="@{/login}">이미 계정이 있어요</a>
         </div>
+
+        <!-- 서버 검증 메시지를 화면 읽기용으로도 전달 -->
+        <div class="sr-live" aria-live="polite" th:if="${#fields.hasErrors('*')}" th:each="e : ${#fields.detailedErrors()}">[[${e.message}]]</div>
     </form>
 </section>
+
+<script>
+    // ===== 유틸 =====
+    const $ = (id) => document.getElementById(id);
+    const addErr = (input, errEl, msg) => {
+        if (!errEl) return;
+        input?.classList.add('invalid');
+        errEl.textContent = msg || '';
+    };
+    const clearErr = (input, errEl) => {
+        if (!errEl) return;
+        input?.classList.remove('invalid');
+        errEl.textContent = '';
+    };
+    const debounce = (fn, ms=250) => {
+        let t; return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
+    };
+
+    // ===== 이메일 실시간 검사 =====
+    const email = $('email'), emailError = $('emailError');
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i; // 간단/실용적 패턴
+
+    async function validateEmailRealtime(){
+        const v = (email.value || '').trim();
+        if (!v) { clearErr(email, emailError); return; }
+
+        // 형식 검사
+        if (!emailPattern.test(v)) {
+            addErr(email, emailError, '이메일 형식이 올바르지 않습니다.');
+            return;
+        } else {
+            clearErr(email, emailError);
+        }
+
+        // (선택) 중복 검사 API가 있다면 비동기 호출
+        // try {
+        //   const res = await fetch(`/api/validate/email?email=${encodeURIComponent(v)}`);
+        //   if (res.ok) {
+        //     const { exists } = await res.json();
+        //     if (exists) addErr(email, emailError, '이미 사용 중인 이메일입니다.');
+        //     else clearErr(email, emailError);
+        //   }
+        // } catch(_) {}
+    }
+    email?.addEventListener('input', debounce(validateEmailRealtime, 200));
+
+    // ===== 닉네임 실시간 검사 =====
+    const nickname = $('nickname'), nicknameError = $('nicknameError');
+    function validateNickname(){
+        const v = (nickname.value || '').trim();
+        if (!v) { addErr(nickname, nicknameError, '닉네임을 입력해 주세요.'); return; }
+        if (v.length < 2) { addErr(nickname, nicknameError, '닉네임은 2자 이상이어야 합니다.'); return; }
+        if (v.length > 20) { addErr(nickname, nicknameError, '닉네임은 20자 이하입니다.'); return; }
+        clearErr(nickname, nicknameError);
+    }
+    nickname?.addEventListener('input', debounce(validateNickname, 150));
+
+    // ===== 비밀번호 강도/길이/일치 =====
+    const pw = $('password'), pwErr = $('passwordError');
+    const pw2 = $('confirmPassword'), pw2Err = $('confirmError');
+    const meter = $('pwMeter'), bar = meter?.querySelector('span');
+
+    function scorePassword(v){
+        let s=0; if(!v) return 0;
+        if (v.length>=8) s+=30;
+        if (/[A-Z]/.test(v)) s+=15;
+        if (/[a-z]/.test(v)) s+=15;
+        if (/\d/.test(v)) s+=20;
+        if (/[^A-Za-z0-9]/.test(v)) s+=20;
+        return Math.min(s,100);
+    }
+    function validatePw(){
+        const v = (pw.value||'');
+        if (v.length < 8) addErr(pw, pwErr, '비밀번호는 8자 이상이어야 합니다.');
+        else clearErr(pw, pwErr);
+
+        // 강도 게이지
+        if (bar){
+            const sc = scorePassword(v);
+            bar.style.width = sc + '%';
+            meter.classList.toggle('ok', sc>=60);
+        }
+        // 확인과도 즉시 비교
+        validatePw2();
+    }
+    function validatePw2(){
+        const v1 = (pw.value||''), v2 = (pw2.value||'');
+        if (!v2){ clearErr(pw2, pw2Err); return; }
+        if (v1 !== v2) addErr(pw2, pw2Err, '비밀번호가 일치하지 않습니다.');
+        else clearErr(pw2, pw2Err);
+    }
+    pw?.addEventListener('input', debounce(validatePw, 120));
+    pw2?.addEventListener('input', debounce(validatePw2, 120));
+
+    // ===== 체크박스(제출 시만 확인) =====
+    const form = document.getElementById('joinForm');
+    const submitBtn = document.getElementById('submitBtn');
+
+    form?.addEventListener('submit', (e) => {
+        // 실시간으로도 마지막 점검
+        validateEmailRealtime();
+        validateNickname();
+        validatePw(); validatePw2();
+
+        const over14 = form.querySelector('input[name="over14"]');
+        const agreeTerms = form.querySelector('input[name="agreeTerms"]');
+        const agreePrivacy = form.querySelector('input[name="agreePrivacy"]');
+
+        let valid = true;
+
+        if (emailError.textContent) valid=false;
+        if (nicknameError.textContent) valid=false;
+        if (pwErr.textContent || pw2Err.textContent) valid=false;
+
+        if (!over14.checked) {
+            addErr(over14, $('over14Error'), '만 14세 이상에 동의해 주세요.');
+            valid=false;
+        } else clearErr(over14, $('over14Error'));
+
+        if (!agreeTerms.checked) {
+            addErr(agreeTerms, $('agreeTermsError'), '이용약관에 동의해 주세요.');
+            valid=false;
+        } else clearErr(agreeTerms, $('agreeTermsError'));
+
+        if (!agreePrivacy.checked) {
+            addErr(agreePrivacy, $('agreePrivacyError'), '개인정보 처리방침에 동의해 주세요.');
+            valid=false;
+        } else clearErr(agreePrivacy, $('agreePrivacyError'));
+
+        if (!valid) {
+            e.preventDefault();
+            // 포커스 이동(첫 에러)
+            const firstErr = document.querySelector('.field-error:not(:empty)');
+            if (firstErr) {
+                const input = firstErr.previousElementSibling?.querySelector('input') || firstErr.previousElementSibling;
+                (input || firstErr).focus();
+            }
+        }
+    });
+
+    // 비밀번호 표시 토글
+    function togglePw(id){
+        const el = document.getElementById(id);
+        el.type = (el.type === 'password') ? 'text' : 'password';
+    }
+    window.togglePw = togglePw; // 인라인에서 접근
+</script>
 </body>
 </html>

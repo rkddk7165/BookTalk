@@ -11,14 +11,16 @@
         <a th:href="@{/join}" class="btn outline">회원가입</a>
     </div>
 
-    <!-- 로그인 된 경우 -->
-    <div th:if="${session.loginUser} != null" class="nav-actions">
-        <span class="welcome" th:text="${session.loginUser.nickname} + '님, 환영합니다!'"></span>
-        <a th:href="@{/me}" class="btn outline">내정보</a>
-        <form th:action="@{/logout}" method="post" style="display:inline">
-            <button type="submit" class="btn">로그아웃</button>
-        </form>
+    <!-- 로그인 상태 영역 -->
+    <div class="nav-right" th:if="${session.loginUser != null}">
+        <img class="avatar-sm"
+             th:src="${session.loginUser.profileImage} != null ? ${session.loginUser.profileImage} : @{/img/avatar-default.png}"
+             alt="프로필">
+        <span class="welcome" th:text="${session.loginUser.nickname} + '님, 환영합니다!'">닉네임님, 환영합니다!</span>
+        <a class="btn nav" th:href="@{/me}">내정보</a>
+        <a class="btn nav" th:href="@{/logout}">로그아웃</a>
     </div>
+
 
 </nav>
 </body>
