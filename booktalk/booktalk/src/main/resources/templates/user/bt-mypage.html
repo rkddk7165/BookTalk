@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+<!-- bt-mypage 전체 블록 -->
+<section class="bt-scope" th:if="${feature != null and feature.btStyle}">
+    <div class="bt-container bt-stack" style="margin-top:24px;">
+        <div class="bt-card">
+            <h1 class="bt-card__title" th:text="|${user.nickname} 님의 마이페이지|">마이페이지</h1>
+            <p class="bt-card__meta" th:text="${user.email}">user@example.com</p>
+        </div>
+
+        <div class="bt-stack">
+            <a class="bt-link-row" th:href="@{/me/posts}">
+                <span>내가 쓴 글</span>
+                <span class="bt-link-row__right" th:text="|총 ${postCount}개|">총 0개</span>
+            </a>
+
+            <a class="bt-link-row" th:href="@{/me/comments}">
+                <span>내가 쓴 댓글</span>
+                <span class="bt-link-row__right" th:text="|총 ${commentCount}개|">총 0개</span>
+            </a>
+
+            <a class="bt-link-row" th:href="@{/me/board-requests}">
+                <span>내 게시판 생성 요청</span>
+                <span class="bt-link-row__right" th:text="|진행중 ${pendingCount}건|">진행중 0건</span>
+            </a>
+        </div>
+    </div>
+</section>
+</body>
+</html>

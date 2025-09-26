@@ -38,6 +38,7 @@ public class InitData {
         user3.setNickname("카이사");
         user3.setHost(Host.LOCAL);
         user3.setRole(Role.USER);
+        user3.setProfileImage("/uploads/profile/u3_5618c486-86fd-4336-8874-0088e24f41d9.jfif");
 
         userRepository.save(user);
         userRepository.save(user2);

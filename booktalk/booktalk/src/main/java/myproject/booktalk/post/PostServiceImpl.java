@@ -220,6 +220,8 @@ public class PostServiceImpl implements PostService {
         return new org.springframework.data.domain.PageImpl<>(mapped, pageable, raw.getTotalElements());
     }
 
+
+
     @Override
     public List<PostRow> notices(Long boardId) {
         return postRepository.findNotices(boardId);

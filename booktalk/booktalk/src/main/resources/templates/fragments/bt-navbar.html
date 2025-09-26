@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+<!-- bt-navbar 조각 -->
+<header class="bt-scope" th:fragment="navbar" th:if="${feature != null and feature.btStyle}">
+    <div class="bt-container bt-row-between"
+         style="height:60px; border-bottom:1px solid var(--bt-border);
+              background: rgba(15,17,23,.8); backdrop-filter: saturate(140%) blur(8px);">
+        <div class="bt-row">
+            <strong><a th:href="@{/}" style="color:var(--bt-text); text-decoration:none;">Booktalk</a></strong>
+            <nav class="bt-row" aria-label="Primary" style="margin-left:16px;">
+                <a th:href="@{/boards/free}" class="bt-btn bt-btn--ghost">자유</a>
+                <a th:href="@{/boards/recommend}" class="bt-btn bt-btn--ghost">추천</a>
+                <a th:href="@{/boards/quotes}" class="bt-btn bt-btn--ghost">문장</a>
+                <a th:href="@{/boards/book-discussion}" class="bt-btn bt-btn--ghost">도서토론</a>
+            </nav>
+        </div>
+
+        <div class="bt-row" th:if="${session.LOGIN_USER != null}">
+            <img class="bt-avatar"
+                 th:src="${session.LOGIN_USER.profileImage != null ? session.LOGIN_USER.profileImage : '/img/avatar-default.png'}"
+                 alt="profile">
+            <span class="bt-muted"
+                  th:text="|${session.LOGIN_USER.nickname} 님, 환영합니다|">사용자 님, 환영합니다</span>
+            <a class="bt-btn" th:href="@{/me}">마이페이지</a>
+            <form th:action="@{/logout}" method="post">
+                <button class="bt-btn">로그아웃</button>
+            </form>
+        </div>
+
+        <div class="bt-row" th:if="${session.LOGIN_USER == null}">
+            <a class="bt-btn bt-btn--primary" th:href="@{/login}">로그인</a>
+            <a class="bt-btn" th:href="@{/join}">회원가입</a>
+        </div>
+    </div>
+</header>
+</body>
+</html>

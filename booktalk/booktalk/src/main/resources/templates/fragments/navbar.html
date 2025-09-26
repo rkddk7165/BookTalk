@@ -18,7 +18,10 @@
              alt="프로필">
         <span class="welcome" th:text="${session.loginUser.nickname} + '님, 환영합니다!'">닉네임님, 환영합니다!</span>
         <a class="btn nav" th:href="@{/me}">내정보</a>
-        <a class="btn nav" th:href="@{/logout}">로그아웃</a>
+        <!-- ✅ 로그아웃: POST 요청 -->
+        <form th:action="@{/logout}" method="post" style="display:inline;">
+            <button type="submit" class="btn nav">로그아웃</button>
+        </form>
     </div>
 
 

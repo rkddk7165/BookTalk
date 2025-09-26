@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<th:block th:replace="~{error/_head :: head}"></th:block>
+
+<style>
+    .ep{ color:#e6e8ee; background:#0b0c10; min-height:100vh; }
+    .ep a{ color:inherit; text-decoration:none; }
+    .ep .wrap{ width:min(960px,92vw); margin:0 auto; padding:24px; }
+    .ep .hero{
+        background: radial-gradient(1200px 600px at 20% -10%, rgba(91,140,255,.22), transparent 60%),
+        radial-gradient(800px 400px at 100% 0%, rgba(173,91,255,.16), transparent 60%);
+        border:1px solid #262a33; border-radius:18px; padding:28px;
+        box-shadow: 0 18px 42px rgba(0,0,0,.35); margin-top:24px;
+    }
+    .ep .code{ font-size:56px; line-height:1; font-weight:800; letter-spacing:.5px; }
+    .ep .badge{ display:inline-flex; align-items:center; gap:8px; padding:8px 12px;
+        border-radius:999px; border:1px solid #2a2f3a; background:#15171c; color:#a9afbd; font-size:.95rem; }
+    .ep .message{ margin:10px 0 4px; font-size:1.25rem; font-weight:600; }
+    .ep .meta{ color:#a9afbd; font-size:.92rem; }
+    .ep .actions{ display:flex; gap:10px; margin-top:18px; }
+    .ep .btn{
+        display:inline-flex; align-items:center; gap:8px; padding:10px 14px; border-radius:12px;
+        border:1px solid #2a2f3a; background:#15171c; color:#e6e8ee; cursor:pointer;
+    }
+    .ep .btn-primary{ background:#5b8cff; color:#fff; border-color:transparent; }
+    .ep .card{ margin-top:22px; border:1px solid #262a33; border-radius:16px; background:#121419; padding:18px; }
+    .ep .list{ display:grid; gap:10px; margin:0; padding:0; list-style:none; }
+    .ep .row{ display:flex; justify-content:space-between; gap:10px; padding:12px 14px; border:1px solid #232732; border-radius:12px; background:#0f1117; }
+    .ep .row small{ color:#a9afbd; }
+    .ep .hr{ height:1px; background:#232732; margin:16px 0; border:0; }
+</style>
+
+
+<body class="ep">
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<div class="wrap">
+    <section class="hero">
+        <div class="badge">잘못된 요청</div>
+        <div class="code" th:text="${status}">400</div>
+        <p class="message" th:text="${message}">요청 값이 올바르지 않습니다.</p>
+        <p class="meta" th:text="|경로: ${path} · 시간: ${timestamp}|">meta</p>
+
+        <div class="actions">
+            <a class="btn" href="javascript:history.back()"><span>←</span><span>이전 페이지</span></a>
+            <a class="btn btn-primary" th:href="@{/}">홈으로</a>
+        </div>
+
+        <div class="card" th:if="${fieldErrors}">
+            <strong>필드 오류</strong>
+            <ul class="list">
+                <li class="row" th:each="fe : ${fieldErrors}">
+                    <div>
+                        <div th:text="|${fe.field} (${fe.code})|">email (NotBlank)</div>
+                        <small th:text="${fe.message}">메시지</small>
+                    </div>
+                    <small th:text="|입력값: ${fe.rejectedValue}|">값</small>
+                </li>
+            </ul>
+        </div>
+    </section>
+</div>
+</body>
+</html>

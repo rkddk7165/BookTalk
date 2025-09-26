@@ -3,6 +3,9 @@ package myproject.booktalk;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import myproject.booktalk.board.FixedBoardSlug;
+import myproject.booktalk.board.service.BoardService;
+import myproject.booktalk.post.PostService;
 import myproject.booktalk.user.Role;
 import myproject.booktalk.user.User;
 import myproject.booktalk.user.session.SessionConst;
@@ -16,6 +19,9 @@ import java.util.List;
 @Controller
 @RequiredArgsConstructor
 public class HomeController {
+
+    private final PostService postService;
+    private final BoardService boardService;
 
     @GetMapping("/")
     public String home(
@@ -37,6 +43,34 @@ public class HomeController {
         model.addAttribute("isAdmin", isAdmin);
         model.addAttribute("boards", boards);
         model.addAttribute("bookBoard", bookBoard);
+
+        // 자유게시판 ID 확보
+        Long freeId = boardService.ensureFixedBoard(
+                FixedBoardSlug.FREE.getTitle(),
+                FixedBoardSlug.FREE.getDescription(),
+                null
+        );
+        // 최근 10개 글
+        model.addAttribute("recentFree",
+                postService.listByBoard(freeId, "all", "latest", 0, 10).getContent());
+
+        // 책추천게시판
+        Long recommendId = boardService.ensureFixedBoard(
+                FixedBoardSlug.RECOMMEND.getTitle(),
+                FixedBoardSlug.RECOMMEND.getDescription(),
+                null
+        );
+        model.addAttribute("recentRecommend",
+                postService.listByBoard(recommendId, "all", "latest", 0, 10).getContent());
+
+        // 한줄글귀게시판
+        Long quotesId = boardService.ensureFixedBoard(
+                FixedBoardSlug.QUOTES.getTitle(),
+                FixedBoardSlug.QUOTES.getDescription(),
+                null
+        );
+        model.addAttribute("recentQuotes",
+                postService.listByBoard(quotesId, "all", "latest", 0, 10).getContent());
 
         return "index"; // templates/index.html
     }

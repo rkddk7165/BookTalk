@@ -1,92 +1,188 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="ko">
 <head>
-    <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1"/>
-    <title>BookTalk 메인</title>
-    <!-- 로그인 페이지와 동일하게 main.css 사용 -->
+    <meta charset="UTF-8" />
+    <title>BookTalk 홈</title>
     <link rel="stylesheet" th:href="@{/css/main.css}">
     <style>
-        :root { color-scheme: light dark; }
-        body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans KR", sans-serif; }
-        .wrap { max-width: 1120px; margin: 0 auto; padding: 40px 20px; }
-        .row { display:flex; align-items:center; gap:12px; }
-        .title { font-size: 28px; font-weight: 800; }
-        .hello { margin-left:auto; font-size:14px; color:#666; }
-        .subtitle { color:#666; margin: 12px 0 22px; }
-        .grid { display:grid; grid-template-columns: repeat(auto-fill, minmax(240px,1fr)); gap:16px; }
-        .card {
-            display:block; padding:18px; border-radius:14px; text-decoration:none;
-            border:1px solid rgba(0,0,0,.08); background: rgba(255,255,255,.7); backdrop-filter: blur(6px);
-            transition: transform .12s ease, box-shadow .12s ease;
+        /* ===== 홈 전용 스코프 ===== */
+        .home{ color:#e6e8ee; background:#0b0c10; min-height:100vh; }
+        .home .wrap{ width:min(1180px,92vw); margin:0 auto; padding:28px 12px 56px; }
+
+        .home .top {
+            display: grid;
+            gap: 20px;
+            grid-template-columns: 1fr 1fr; /* 상단 자유/추천 → 1:1 */
+            margin-bottom: 20px;
         }
-        .card h3 {
-            color: #fff;          /* 흰색으로 고정 */
-            font-weight: 700;
+        .home .bottom {
+            display: grid;
+            gap: 20px;
+            grid-template-columns: 1fr 1fr; /* 하단 글귀/패널 → 1:1 */
         }
-        .card p {
-            color: #ccc;          /* 부제목은 회색 */
+
+
+        @media (max-width: 1024px){
+            .home .top{ grid-template-columns: 1fr; }
+            .home .bottom{ grid-template-columns: 1fr; }
         }
-        .card {
-            color: inherit;       /* a 태그 색 덮어쓰기 */
-            text-decoration: none;
+
+        /* 카드 공통 */
+        .home .card{
+            background:#15171c; border:1px solid #262a33; border-radius:16px;
+            box-shadow:0 12px 28px rgba(0,0,0,.28); overflow:hidden;
         }
-        .card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,.12); }
-        .card h3 { margin:0 0 6px; font-size:18px; }
-        .card p { margin:0; color:#666; font-size:14px; }
-        .book {
-            border:1px dashed rgba(0,0,0,.18);
-            background: linear-gradient(135deg, rgba(66,133,244,.08), rgba(52,168,83,.08));
+        .home .card .head{
+            display:flex; align-items:center; justify-content:space-between;
+            padding:16px 18px; border-bottom:1px solid #232732;
+        }
+        .home .card .head h2{ margin:0; font-size:1.08rem; font-weight:800; letter-spacing:.2px; }
+        .home .card .head a{ color:#e6e8ee; text-decoration:none; }
+        .home .card .head a:hover{ text-decoration:underline; }
+        .home .more{ font-size:.92rem; color:#8fb0ff; text-decoration:none; }
+        .home .more:hover{ text-decoration:underline; }
+
+        /* 리스트 */
+        .home .list{ list-style:none; margin:0; padding:8px 0; }
+        .home .item{ padding:12px 18px; border-bottom:1px solid #1b1f27; }
+        .home .item:last-child{ border-bottom:none; }
+
+        .home .title-row{
+            display:flex; align-items:center; gap:8px; margin-bottom:6px; min-height:22px;
+        }
+        .home .title{
+            color:#e6e8ee; text-decoration:none; font-weight:600; line-height:1.3;
+            display:inline-block; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+        }
+        .home .title:hover{ text-decoration:underline; }
+        .home .cmt{
+            flex:0 0 auto; font-size:.86rem; color:#a9afbd; background:#0f1117;
+            border:1px solid #232732; padding:2px 6px; border-radius:8px;
+        }
+
+        .home .meta{ font-size:.9rem; color:#a9afbd; display:flex; align-items:center; gap:10px; }
+        .home .dot{ opacity:.6; }
+        .home .likes{ font-weight:600; }
+        .home .empty{ padding:18px; color:#a9afbd; }
+
+        /* 오른쪽 버튼 패널 */
+        .home .panel{
+            background:#15171c; border:1px solid #262a33; border-radius:16px;
+            box-shadow:0 12px 28px rgba(0,0,0,.28); padding:18px;
+            display:grid; gap:14px;
+        }
+        .home .panel .bigbtn{
+            display:flex; align-items:center; justify-content:center; gap:10px;
+            background:#5b8cff; color:#fff; text-decoration:none; padding:16px 18px;
+            border-radius:14px; font-weight:800; font-size:1.02rem; border:0;
+            box-shadow:0 10px 22px rgba(91,140,255,.25);
+        }
+        .home .panel .bigbtn.secondary{
+            background:#20c997; box-shadow:0 10px 22px rgba(32,201,151,.22);
+        }
+        .home .panel .bigbtn:hover{ filter:brightness(1.05); }
+        .home .panel .sub{
+            font-size:.92rem; color:#a9afbd; text-align:center; margin-top:2px;
         }
     </style>
 </head>
-<body>
+<body class="home">
 
-<!-- 네비게이션: 로그인 페이지와 동일하게 header + th:replace -->
-<header th:replace="fragments/navbar :: navbar"></header>
+<!-- 상단바 -->
+<div th:replace="~{fragments/navbar :: navbar}"></div>
 
-<div class="wrap">
-    <div class="row">
-        <div class="title">BookTalk</div>
-        <div class="hello" th:if="${loginUser != null}"
-             th:text="|안녕하세요, ${loginUser.nickname} 님|">안녕하세요</div>
-    </div>
+<main class="wrap">
 
-    <div class="subtitle">이용 할 게시판을 선택하세요.</div>
+    <!-- 상단 2장: 자유 / 책추천 -->
+    <section class="top">
 
-    <!-- ✅ 관리자 전용 버튼 -->
-    <div class="toolbar" style="margin: 16px 0;">
-        <a th:if="${isAdmin}" class="btn primary" th:href="@{/admin/board-requests}">
-            게시판 생성 요청 관리
-        </a>
-    </div>
+        <!-- 자유게시판 -->
+        <article class="card">
+            <div class="head">
+                <h2><a th:href="@{/boards/free}">자유게시판</a></h2>
+                <a class="more" th:href="@{/boards/free}">더보기 →</a>
+            </div>
+            <ul class="list">
+                <li class="item" th:each="p : ${recentFree}">
+                    <div class="title-row">
+                        <a class="title" th:href="@{|/post/${p.id}|}" th:text="${p.title}">제목</a>
+                        <span class="cmt" th:text="|[${p.commentCount}]|">[0]</span>
+                    </div>
+                    <div class="meta">
+                        <span class="author" th:text="${p.authorNickname != null ? p.authorNickname : '익명'}">작성자</span>
+                        <span class="dot">·</span>
+                        <span class="likes" th:text="|❤ ${p.likeCount}|">❤ 0</span>
+                        <span class="dot">·</span>
+                        <span class="date" th:text="${#temporals.format(p.createdAt,'yyyy.MM.dd HH:mm')}">2025.01.01 12:00</span>
+                    </div>
+                </li>
+                <li class="empty" th:if="${#lists.isEmpty(recentFree)}">아직 게시글이 없습니다.</li>
+            </ul>
+        </article>
 
+        <!-- 책추천게시판 -->
+        <article class="card">
+            <div class="head">
+                <h2><a th:href="@{/boards/recommend}">책추천게시판</a></h2>
+                <a class="more" th:href="@{/boards/recommend}">더보기 →</a>
+            </div>
+            <ul class="list">
+                <li class="item" th:each="p : ${recentRecommend}">
+                    <div class="title-row">
+                        <a class="title" th:href="@{|/post/${p.id}|}" th:text="${p.title}">제목</a>
+                        <span class="cmt" th:text="|[${p.commentCount}]|">[0]</span>
+                    </div>
+                    <div class="meta">
+                        <span class="author" th:text="${p.authorNickname != null ? p.authorNickname : '익명'}">작성자</span>
+                        <span class="dot">·</span>
+                        <span class="likes" th:text="|❤ ${p.likeCount}|">❤ 0</span>
+                        <span class="dot">·</span>
+                        <span class="date" th:text="${#temporals.format(p.createdAt,'yyyy.MM.dd HH:mm')}">2025.01.01 12:00</span>
+                    </div>
+                </li>
+                <li class="empty" th:if="${#lists.isEmpty(recentRecommend)}">아직 게시글이 없습니다.</li>
+            </ul>
+        </article>
 
-    <div class="toolbar" style="margin: 16px 0;">
-        <a th:if="${!isAdmin}" class="btn primary" th:href="@{/board-requests/my}">
-            게시판 생성 요청 목록
-        </a>
-    </div>
+    </section>
 
-    <div class="grid">
-        <!-- 3개 고정 게시판 -->
-        <a th:each="b : ${boards}" th:href="${b.href}" class="card">
-            <h3 th:text="${b.title}">자유게시판</h3>
-            <p>커뮤니티 글 보기 · 글쓰기</p>
-        </a>
+    <!-- 하단: 좌(한줄글귀), 우(책 검색 + 도서토론) -->
+    <section class="bottom">
 
-        <!-- 도서 게시판: /book/search 로 진입 -->
-        <a th:href="${bookBoard.href}" class="card book">
-            <h3 th:text="${bookBoard.title}">도서 게시판</h3>
-            <p>책을 검색해 해당 책 게시판으로 이동하거나 새로 생성합니다</p>
-        </a>
+        <!-- 한줄글귀게시판 -->
+        <article class="card">
+            <div class="head">
+                <h2><a th:href="@{/boards/quotes}">한줄글귀게시판</a></h2>
+                <a class="more" th:href="@{/boards/quotes}">더보기 →</a>
+            </div>
+            <ul class="list">
+                <li class="item" th:each="p : ${recentQuotes}">
+                    <div class="title-row">
+                        <a class="title" th:href="@{|/post/${p.id}|}" th:text="${p.title}">제목</a>
+                        <span class="cmt" th:text="|[${p.commentCount}]|">[0]</span>
+                    </div>
+                    <div class="meta">
+                        <span class="author" th:text="${p.authorNickname != null ? p.authorNickname : '익명'}">작성자</span>
+                        <span class="dot">·</span>
+                        <span class="likes" th:text="|❤ ${p.likeCount}|">❤ 0</span>
+                        <span class="dot">·</span>
+                        <span class="date" th:text="${#temporals.format(p.createdAt,'yyyy.MM.dd HH:mm')}">2025.01.01 12:00</span>
+                    </div>
+                </li>
+                <li class="empty" th:if="${#lists.isEmpty(recentQuotes)}">아직 게시글이 없습니다.</li>
+            </ul>
+        </article>
 
-        <!-- ✅ 책 토론 게시판 목록으로 이동 -->
-        <a th:href="@{/boards/book-discussion}" class="card">
-            <h3>책 토론 게시판</h3>
-            <p>승인된 책 게시판을 ㄱㄴㄷ 순으로 보기</p>
-        </a>
-    </div>
-</div>
+        <!-- 오른쪽 버튼 패널 -->
+        <aside class="panel">
+            <a class="bigbtn" th:href="@{/books/search}">🔎 책 검색</a>
+            <div class="sub">카카오 도서 검색으로 원하는 책을 찾아보세요</div>
+            <a class="bigbtn secondary" th:href="@{/boards/book-discussion}">💬 도서토론 게시판</a>
+            <div class="sub">책별 토론글 모아보기</div>
+        </aside>
+
+    </section>
+
+</main>
 </body>
 </html>

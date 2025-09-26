@@ -1,0 +1,68 @@
+/* static/css/bt.css */
+@layer btBase;
+/* 스코프 래퍼 */
+.bt-scope{
+    /* 토큰(전역 아님) */
+    --bt-bg: #0b0c10;
+    --bt-surface: #15171c;
+    --bt-text: #e6e8ee;
+    --bt-muted: #a9afbd;
+    --bt-primary: #5b8cff;
+    --bt-border: #262a33;
+
+    --bt-r: 12px;
+    --bt-r-lg: 16px;
+    --bt-gap-1: 6px;
+    --bt-gap-2: 10px;
+    --bt-gap-3: 16px;
+    --bt-gap-4: 24px;
+}
+
+/* 레이아웃 유틸 */
+@layer btBase {
+    .bt-scope .bt-container{ width:min(1100px, 92vw); margin:0 auto; padding-inline: var(--bt-gap-3); }
+    .bt-scope .bt-stack{ display:flex; flex-direction:column; gap:var(--bt-gap-3); }
+    .bt-scope .bt-row{ display:flex; align-items:center; gap:var(--bt-gap-3); }
+    .bt-scope .bt-row-between{ display:flex; align-items:center; justify-content:space-between; gap:var(--bt-gap-3); }
+}
+
+/* 컴포넌트 */
+@layer btBase {
+    .bt-scope .bt-card{
+        background: var(--bt-surface);
+        border:1px solid var(--bt-border);
+        border-radius: var(--bt-r-lg);
+        padding: var(--bt-gap-4);
+        box-shadow: 0 8px 24px rgba(0,0,0,.25);
+        color: var(--bt-text);
+    }
+    .bt-scope .bt-card__title{ margin:0 0 8px; font-weight:700; }
+    .bt-scope .bt-card__meta{ color: var(--bt-muted); font-size:.9rem; }
+
+    .bt-scope .bt-link-row{
+        display:flex; align-items:center; justify-content:space-between;
+        padding:14px 16px; border:1px solid var(--bt-border); border-radius: var(--bt-r);
+        text-decoration:none; color: var(--bt-text); background: var(--bt-surface);
+        transition: filter .12s ease, background .12s ease;
+    }
+    .bt-scope .bt-link-row:hover{ background:#1a1f28; }
+    .bt-scope .bt-link-row__right{ color: var(--bt-muted); font-size:.9rem; }
+
+    .bt-scope .bt-btn{
+        display:inline-flex; align-items:center; justify-content:center; gap:8px;
+        padding:10px 14px; border-radius: var(--bt-r);
+        border:1px solid var(--bt-border); background: var(--bt-surface);
+        color: var(--bt-text); text-decoration:none; cursor:pointer;
+    }
+    .bt-scope .bt-btn--primary{ background: var(--bt-primary); color:#fff; border-color: transparent; }
+    .bt-scope .bt-btn--ghost{ background: transparent; }
+
+    .bt-scope .bt-avatar{
+        width: 32px; height: 32px; border-radius: 50%;
+        object-fit: cover; flex: 0 0 32px; border:1px solid var(--bt-border);
+    }
+
+    .bt-scope .bt-prose a{ color: var(--bt-primary); text-decoration: underline; }
+    .bt-scope .bt-prose p{ margin: 10px 0; }
+    .bt-scope .bt-muted{ color: var(--bt-muted); }
+}

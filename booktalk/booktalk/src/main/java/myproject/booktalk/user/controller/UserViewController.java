@@ -22,7 +22,9 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.data.domain.PageRequest;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequiredArgsConstructor
@@ -83,6 +85,11 @@ public class UserViewController {
 
         // 어떤 탭을 열지 (선택)
         model.addAttribute("activeTab", tab == null ? "overview" : tab);
+
+        // 🔽 여기 추가 (플래그)
+        Map<String, Object> feature = new HashMap<>();
+        feature.put("btStyle", true); // false 로 바꾸면 새 블록이 안 보임
+        model.addAttribute("feature", feature);
 
         return "user/mypage";
     }

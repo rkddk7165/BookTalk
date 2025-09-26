@@ -1,0 +1,9 @@
+error.validation=요청 값이 올바르지 않습니다.
+error.forbidden=접근 권한이 없습니다.
+error.not_found=요청하신 리소스를 찾을 수 없습니다.
+error.internal=서버 내부 오류가 발생했습니다.
+
+# 공통 필드명(옵션)
+field.email=이메일
+field.password=비밀번호
+field.nickname=닉네임

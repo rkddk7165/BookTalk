@@ -54,3 +54,125 @@ label { color: var(--muted); font-weight:600; font-size: 14px; }
     height:32px;             /* 아바타 높이와 비슷하게 */
 }
 .btn.nav:hover{ background:#24272c; }
+
+/* 홈 버튼 영역 */
+.home-buttons {
+    margin: 2rem 0;
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.home-buttons .btn {
+    flex: 1;
+    text-align: center;
+}
+
+/* 게시판 프리뷰 */
+.board-preview {
+    margin-top: 2rem;
+}
+
+.board-preview h2 {
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+}
+
+.board-preview ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.board-preview li {
+    padding: 4px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.board-preview li a {
+    text-decoration: none;
+    color: #333;
+}
+
+.board-preview li a:hover {
+    text-decoration: underline;
+}
+
+/* 홈 버튼 영역 */
+.home-buttons {
+    margin: 2rem 0;
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.home-buttons .btn {
+    flex: 1;
+    text-align: center;
+    padding: 0.8rem 1rem;
+    font-weight: 600;
+}
+
+/* 게시판 프리뷰 카드 */
+.board-preview-grid {
+    display: grid;
+    gap: 2rem;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+.board-card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    background: #fff;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+.board-card .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 0.5rem;
+}
+
+.board-card h2 {
+    font-size: 1.1rem;
+    font-weight: bold;
+    margin: 0;
+}
+
+.board-card .more-link {
+    font-size: 0.9rem;
+    color: #007bff;
+    text-decoration: none;
+}
+
+.board-card .more-link:hover {
+    text-decoration: underline;
+}
+
+.post-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.post-list li {
+    padding: 4px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.post-list li:last-child {
+    border-bottom: none;
+}
+
+.post-list a {
+    text-decoration: none;
+    color: #333;
+}
+
+.post-list a:hover {
+    text-decoration: underline;
+}
+
+
