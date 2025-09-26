@@ -72,6 +72,8 @@ public class HomeController {
         model.addAttribute("recentQuotes",
                 postService.listByBoard(quotesId, "all", "latest", 0, 10).getContent());
 
+        model.addAttribute("topWriters", postService.findTopWriters(5));
+
         return "index"; // templates/index.html
     }
 

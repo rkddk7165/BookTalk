@@ -6,7 +6,10 @@
     <link rel="stylesheet" th:href="@{/css/main.css}">
     <style>
         /* ===== 홈 전용 스코프 ===== */
-        .home{ color:#e6e8ee; background:#0b0c10; min-height:100vh; }
+        .home{ min-height:100vh; }      /* 공통 */
+        .home.light{ background:#f6f7fb; color:#222; }
+        .home.dark{  background:#0b0c10; color:#e6e8ee; }
+
         .home .wrap{ width:min(1180px,92vw); margin:0 auto; padding:28px 12px 56px; }
 
         .home .top {
@@ -27,15 +30,20 @@
             .home .bottom{ grid-template-columns: 1fr; }
         }
 
-        /* 카드 공통 */
-        .home .card{
-            background:#15171c; border:1px solid #262a33; border-radius:16px;
-            box-shadow:0 12px 28px rgba(0,0,0,.28); overflow:hidden;
+        /* 라이트 */
+        .home.light .card,
+        .home.light .panel,
+        .home.light .home-sidewriters{
+            background:#fff; border:1px solid #e9ecef; box-shadow:0 8px 18px rgba(0,0,0,.06); color:#222;
         }
-        .home .card .head{
-            display:flex; align-items:center; justify-content:space-between;
-            padding:16px 18px; border-bottom:1px solid #232732;
+        /* 다크 */
+        .home.dark .card,
+        .home.dark .panel,
+        .home.dark .home-sidewriters{
+            background:#15171c; border:1px solid #262a33; box-shadow:0 12px 28px rgba(0,0,0,.28); color:#e6e8ee;
         }
+
+
         .home .card .head h2{ margin:0; font-size:1.08rem; font-weight:800; letter-spacing:.2px; }
         .home .card .head a{ color:#e6e8ee; text-decoration:none; }
         .home .card .head a:hover{ text-decoration:underline; }
@@ -44,33 +52,45 @@
 
         /* 리스트 */
         .home .list{ list-style:none; margin:0; padding:8px 0; }
-        .home .item{ padding:12px 18px; border-bottom:1px solid #1b1f27; }
         .home .item:last-child{ border-bottom:none; }
 
         .home .title-row{
             display:flex; align-items:center; gap:8px; margin-bottom:6px; min-height:22px;
         }
-        .home .title{
-            color:#e6e8ee; text-decoration:none; font-weight:600; line-height:1.3;
-            display:inline-block; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
-        }
         .home .title:hover{ text-decoration:underline; }
-        .home .cmt{
-            flex:0 0 auto; font-size:.86rem; color:#a9afbd; background:#0f1117;
-            border:1px solid #232732; padding:2px 6px; border-radius:8px;
-        }
 
-        .home .meta{ font-size:.9rem; color:#a9afbd; display:flex; align-items:center; gap:10px; }
+        /* 헤더 보더 */
+        .home.light .card .head{ border-bottom:1px solid #eff2f6; }
+        .home.dark  .card .head{ border-bottom:1px solid #232732; }
+
+        /* 리스트 구분선 */
+        .home.light .item{ border-bottom:1px solid #eff2f6; }
+        .home.dark  .item{ border-bottom:1px solid #1b1f27; }
+
+        /* 제목 색 */
+        .home.light .title{ color:#0f172a; }
+        .home.dark  .title{ color:#e6e8ee; }
+
+        /* 코멘트 배지 */
+        .home.light .cmt{ background:#f3f6fb; border:1px solid #e6ecf5; color:#475569; }
+        .home.dark  .cmt{ background:#0f1117; border:1px solid #232732; color:#a9afbd; }
+
+        /* 메타 텍스트 */
+        .home.light .meta{ color:#64748b; }
+        .home.dark  .meta{ color:#a9afbd; }
+
+
+        /* 자유/추천/글귀 헤더 라이트 전용 파스텔 */
+        .home.light .top > article:nth-of-type(1) .head{ background:linear-gradient(135deg,#e8f1ff,#cfe5ff); }
+        .home.light .top > article:nth-of-type(2) .head{ background:linear-gradient(135deg,#e9fff4,#ccf7e6); }
+        .home.light .bottom > article:nth-of-type(1) .head{ background:linear-gradient(135deg,#fff5e7,#ffe7c7); }
+
+
         .home .dot{ opacity:.6; }
         .home .likes{ font-weight:600; }
         .home .empty{ padding:18px; color:#a9afbd; }
 
-        /* 오른쪽 버튼 패널 */
-        .home .panel{
-            background:#15171c; border:1px solid #262a33; border-radius:16px;
-            box-shadow:0 12px 28px rgba(0,0,0,.28); padding:18px;
-            display:grid; gap:14px;
-        }
+
         .home .panel .bigbtn{
             display:flex; align-items:center; justify-content:center; gap:10px;
             background:#5b8cff; color:#fff; text-decoration:none; padding:16px 18px;
@@ -84,12 +104,158 @@
         .home .panel .sub{
             font-size:.92rem; color:#a9afbd; text-align:center; margin-top:2px;
         }
+
+
+
+        .home-sidewriters .tw-head{
+            padding:12px 14px;
+            font-weight:800;
+            border-bottom:1px solid #232732;
+        }
+        .home-sidewriters .tw-list{
+            list-style:none;
+            margin:0; padding:8px 0;
+        }
+        .home-sidewriters .tw-item{
+            display:flex; align-items:center; gap:10px;
+            padding:10px 14px;
+            border-bottom:1px solid #1b1f27;
+        }
+        .home-sidewriters .tw-item:last-child{ border-bottom:none; }
+
+        .home-sidewriters .tw-rank{
+            width:28px; height:28px; border-radius:8px;
+            display:flex; align-items:center; justify-content:center;
+            background:#0f1117; border:1px solid #232732; color:#e6e8ee; font-weight:800;
+        }
+        .home-sidewriters .tw-user{
+            display:flex; align-items:center; justify-content:space-between; width:100%;
+        }
+        .home-sidewriters .tw-user a{
+            color:#e6e8ee; text-decoration:none; font-weight:600;
+        }
+        .home-sidewriters .tw-user a:hover{ text-decoration:underline; }
+        .home-sidewriters .tw-count{
+            color:#a9afbd; font-weight:700; background:#0f1117; border:1px solid #232732;
+            padding:2px 6px; border-radius:8px; font-size:.86rem;
+        }
+
+        /* 메달 느낌 */
+        .home-sidewriters .tw-item:nth-child(1) .tw-rank{ background:#ffd166; color:#222; }
+        .home-sidewriters .tw-item:nth-child(2) .tw-rank{ background:#ced4da; color:#222; }
+        .home-sidewriters .tw-item:nth-child(3) .tw-rank{ background:#c59f6f; color:#222; }
+
+        /* 화면이 좁으면 자동 숨김(기존 레이아웃 가림 방지) */
+        @media (max-width: 1280px){
+            .home-sidewriters{ display:none; }
+        }
+        /* ===== Top Writers: 왼쪽 고정 재적용 ===== */
+        .home-sidewriters{
+            position: fixed !important;
+            left: 24px !important;
+            top: 74px !important;          /* 네비 높이에 맞춰 조정 */
+            width: 260px !important;
+            z-index: 50 !important;
+        }
+
+
+
+        /* 1280px 이하에선 사이드 숨김(겹침 방지) */
+        @media (max-width:1280px){
+            .home-sidewriters{ display:none !important; }
+            .home .wrap{ padding-left: 12px; }
+        }
+
+        /* ===== 가독성 강화: 텍스트 대비 ↑ ===== */
+        /* 카드 헤더/링크 */
+        .home.light .card .head h2,
+        .home.light .card .head a{ color:#111827 !important; }     /* 거의 검정 */
+        .home.light .more{ color:#2563eb !important; font-weight:700; }
+
+        /* 리스트 제목 */
+        .home.light .title{ color:#111827 !important; font-weight:700; }
+        .home.light .title:hover{ text-decoration:underline; }
+
+        /* 메타 정보(작성자·좋아요·날짜) */
+        .home.light .meta{ color:#475569 !important; font-size:.92rem; }
+
+        /* 비어있음 문구 */
+        .home.light .empty{ color:#64748b !important; }
+
+        /* 코멘트 배지(조금 더 선명하게) */
+        .home.light .cmt{
+            background:#e9efff !important;
+            border:1px solid #cfe0ff !important;
+            color:#1f3b8a !important;
+            font-weight:700;
+        }
+
+        /* 카드 테두리/그림자도 살짝 진하게 */
+        .home.light .card,
+        .home.light .panel,
+        .home.light .home-sidewriters{
+            border-color:#e3e8ef !important;
+            box-shadow:0 10px 20px rgba(16,24,40,.06) !important;
+        }
+
+        /* 사이드바: 가운데 정렬된 컨테이너의 '왼쪽 바깥'에 고정 배치 */
+        .home-sidewriters{
+            position: fixed !important;
+            /* 컨텐츠 최대폭(min(1180px, 92vw))의 왼쪽 끝에서 40px 떨어진 지점 */
+            left: calc(50% - min(1180px, 92vw)/2 - 300px) !important; /* 260(sidebar) + 40(gap) */
+            top: 74px !important;     /* 네비 높이에 맞춰 필요시 64~88px로 조정 */
+            width: 260px !important;
+            z-index: 50 !important;
+        }
+
+        /* 화면이 좁아지면 자동 숨김(겹침 방지) */
+        @media (max-width: 1280px){
+            .home-sidewriters{ display:none !important; }
+        }
+        /* 헤더 행을 한 줄 정렬 + 우측 끝 정렬 */
+        .home .card .head{
+            display:flex;
+            align-items:center;
+            gap:12px;
+        }
+        .home .card .head h2{
+            margin:0;
+            font-size:1.08rem;
+            font-weight:800;
+            letter-spacing:.2px;
+            min-width:0;               /* flex에서 수축 허용 */
+        }
+        .home .card .head .more{
+            margin-left:auto;          /* 오른쪽 끝으로 밀기 */
+            white-space:nowrap;        /* 줄바꿈 방지 */
+        }
+
+
+
     </style>
 </head>
 <body class="home">
 
 <!-- 상단바 -->
 <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<!-- 좌측 Top Writers 고정 패널: 기존 레이아웃 영향 없음 -->
+<aside class="home-sidewriters" th:if="${topWriters != null}">
+    <div class="tw-head">Top Writers</div>
+    <ol class="tw-list">
+        <li class="tw-item" th:each="tw, iStat : ${topWriters}">
+            <div class="tw-rank" th:text="${iStat.index + 1}">1</div>
+            <div class="tw-user">
+                <a th:href="@{|/users/${tw.userId}|}" th:text="${tw.nickname ?: '익명'}">닉네임</a>
+                <span class="tw-count" th:text="|${tw.postCount}|">0</span>
+            </div>
+        </li>
+        <li class="tw-item" th:if="${#lists.isEmpty(topWriters)}">
+            <div style="opacity:.8;">아직 집계할 데이터가 없습니다.</div>
+        </li>
+    </ol>
+</aside>
+
 
 <main class="wrap">
 
@@ -184,5 +350,28 @@
     </section>
 
 </main>
+<script>
+    function toggleTheme() {
+        const body = document.body;
+        if (body.classList.contains('light')) {
+            body.classList.remove('light');
+            body.classList.add('dark');
+            localStorage.setItem('theme', 'dark');
+        } else {
+            body.classList.remove('dark');
+            body.classList.add('light');
+            localStorage.setItem('theme', 'light');
+        }
+    }
+
+    // 초기 진입 시 로컬스토리지 값 적용
+    (function() {
+        const saved = localStorage.getItem('theme') || 'light';
+        document.body.classList.add(saved);
+    })();
+</script>
+
 </body>
+
+
 </html>

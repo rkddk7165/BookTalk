@@ -2,6 +2,7 @@ package myproject.booktalk.post;
 
 import jakarta.persistence.LockModeType;
 import myproject.booktalk.post.dto.PostRow;
+import myproject.booktalk.user.dto.TopWriterRow;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;  // ✅
@@ -111,6 +112,16 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("update Post p set p.commentCount = coalesce(p.commentCount,0) + :delta where p.id = :postId")
     int bumpCommentCount(Long postId, int delta);
+
+
+    //TopWriters 집계
+    @Query("""
+           select new myproject.booktalk.user.dto.TopWriterRow(u.id, u.nickname, count(p))
+           from Post p join p.user u
+           group by u.id, u.nickname
+           order by count(p) desc
+           """)
+    List<TopWriterRow> findTopWriters(Pageable pageable);
 
 
 

@@ -9,6 +9,7 @@ import myproject.booktalk.postReaction.PostReactionRepository;
 import myproject.booktalk.user.Role;
 import myproject.booktalk.user.User;
 import myproject.booktalk.user.UserRepository;
+import myproject.booktalk.user.dto.TopWriterRow;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -218,6 +219,12 @@ public class PostServiceImpl implements PostService {
             ));
         }
         return new org.springframework.data.domain.PageImpl<>(mapped, pageable, raw.getTotalElements());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<TopWriterRow> findTopWriters(int limit) {
+        return postRepository.findTopWriters(PageRequest.of(0, limit));
     }
 
 

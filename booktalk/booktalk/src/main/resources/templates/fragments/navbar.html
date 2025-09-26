@@ -21,6 +21,9 @@
         <!-- ✅ 로그아웃: POST 요청 -->
         <form th:action="@{/logout}" method="post" style="display:inline;">
             <button type="submit" class="btn nav">로그아웃</button>
+            <!-- ✅ 테마 전환 버튼 -->
+            <button type="button" class="btn nav" onclick="toggleTheme()">🌓 테마</button>
+
         </form>
     </div>
 

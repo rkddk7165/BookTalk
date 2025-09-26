@@ -4,6 +4,7 @@ import myproject.booktalk.post.dto.PostCreateRequest;
 import myproject.booktalk.post.dto.PostDetailDto;
 import myproject.booktalk.post.dto.PostRow;
 import myproject.booktalk.post.dto.PostUpdateRequest;
+import myproject.booktalk.user.dto.TopWriterRow;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
@@ -31,4 +32,6 @@ public interface PostService {
     long countByUserId(Long id);
     List<?> findRecentByUserId(Long userId, org.springframework.data.domain.Pageable pageable);
 
+
+    List<TopWriterRow> findTopWriters(int limit);
 }
