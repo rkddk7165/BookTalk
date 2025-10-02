@@ -52,17 +52,43 @@
         .news ul{margin:0; padding-left:18px; color:var(--muted); font-size:13px;}
         .news li{margin:6px 0;}
 
-        /* 댓글 */
-        .cmt-wrap{margin-top:14px; border:1px solid var(--line); background:var(--card); border-radius:8px; overflow:hidden;}
-        .cmt-head{display:flex; justify-content:space-between; align-items:center; padding:12px 14px; border-bottom:1px solid var(--line); background:#161616;}
-        .cmt-title{font-weight:700;}
+        /* 댓글 (리뉴얼) */
+        .cmt-wrap{margin-top:16px; border:1px solid var(--line); background:var(--card); border-radius:12px; overflow:hidden;}
+        .cmt-head{display:flex; justify-content:space-between; align-items:center; padding:14px 16px; border-bottom:1px solid var(--line); background:#161616;}
+        .cmt-title{font-weight:800; font-size:14px;}
         .cmt-info{color:var(--muted); font-size:12px;}
-        .cmt-list .item{padding:12px 14px; border-bottom:1px solid var(--line);}
-        .cmt-list .meta{font-size:12px; color:var(--muted); margin-bottom:6px;}
-        .cmt-form{padding:12px 14px; display:flex; flex-direction:column; gap:10px;}
-        .cmt-row{display:flex; gap:8px;}
-        .cmt-row textarea{width:100%; min-height:90px; padding:10px; border-radius:8px; border:1px solid var(--chip-border); background:#222; color:#fff; resize:vertical;}
-        .cmt-actions{display:flex; justify-content:flex-end; gap:8px;}
+
+        .cmt-list{padding:6px 0;}
+        .cmt-item{display:flex; gap:12px; padding:12px 16px; border-bottom:1px solid var(--line);}
+        .cmt-item:last-child{border-bottom:none;}
+        .cmt-avatar{width:34px; height:34px; border-radius:50%; background:#2a2a2a; border:1px solid var(--chip-border); display:flex; align-items:center; justify-content:center; font-size:14px; color:#cbd5e1; flex:0 0 34px;}
+        .cmt-body{flex:1; min-width:0;}
+        .cmt-meta{display:flex; align-items:center; gap:8px; font-size:12px; color:var(--muted);}
+        .cmt-meta strong{color:#eaeaea; font-weight:700;}
+        .cmt-content{margin-top:6px; line-height:1.7; word-break:break-word;}
+        .cmt-actions{display:flex; gap:6px; margin-top:8px;}
+        .cmt-actions .icon-btn{padding:4px 8px; font-size:12px; color:var(--muted); border:1px solid transparent; background:transparent; border-radius:6px; cursor:pointer;}
+        .cmt-actions .icon-btn:hover{background:#1f1f1f; border-color:#2d2d2d; color:#d1d5db;}
+
+        /* 대댓글(스레드) */
+        .cmt-thread{margin-top:10px; border-left:2px solid #2a2a2a; padding-left:12px;}
+        .cmt-reply{display:flex; gap:10px; padding:10px 0;}
+        .cmt-reply .cmt-avatar{width:28px; height:28px; font-size:12px; flex:0 0 28px;}
+
+        /* 작성폼(컴포저) */
+        .composer{padding:14px 16px; border-top:1px solid var(--line); background:#141414;}
+        .composer-inner{display:flex; gap:10px;}
+        .composer .cmt-avatar{margin-top:2px;}
+        .composer textarea{flex:1; min-height:46px; max-height:240px; padding:10px 12px; background:#1e1e1e; color:#e5e7eb; border:1px solid #2d2d2d; border-radius:10px; resize:vertical; outline:none;}
+        .composer textarea:focus{border-color:#3b82f6; box-shadow:0 0 0 3px rgba(59,130,246,.15);}
+        .composer .composer-actions{display:flex; gap:8px; align-items:flex-end;}
+        .composer .btn{height:40px; padding:0 14px; border-radius:10px;}
+
+        /* 소형 버튼 */
+        .btn.xs{padding:6px 10px; font-size:12px; border-radius:8px;}
+
+        /* 톤 다운 텍스트 */
+        .muted{color:var(--muted);}
 
         /* toast */
         #toast { position: fixed; left:50%; bottom:40px; transform:translateX(-50%);
@@ -162,66 +188,90 @@
             <div class="cmt-info">※ 운영원칙 위반 댓글은 제재될 수 있습니다.</div>
         </div>
 
-        <!-- 댓글 목록 -->
+        <!-- 목록 -->
         <div class="cmt-list" th:if="${#lists.size(comments) > 0}">
-            <div class="item" th:each="c : ${comments}">
-                <div class="meta">
-                    <strong th:text="${c.authorNickname}">익명</strong>
-                    <span class="divider">|</span>
-                    <span th:text="${#temporals.format(c.createdAt,'yyyy.MM.dd HH:mm')}">시간</span>
+            <div class="cmt-item" th:each="c : ${comments}">
+                <!-- 아바타: 닉네임 첫 글자 -->
+                <div class="cmt-avatar" th:text="${#strings.substring(c.authorNickname,0,1)}">A</div>
 
-                    <!-- 내 댓글이면 삭제 버튼 노출 -->
-                    <form th:if="${loginUserId != null and loginUserId == c.userId}"
-                          th:action="@{|/comments/${c.id}/delete|}" method="post" style="margin-left:auto">
-                        <input type="hidden" name="postId" th:value="${post.id}"/>
-                        <button type="submit" class="btn ghost" onclick="return confirm('삭제하시겠어요?')">삭제</button>
-                    </form>
-                </div>
+                <div class="cmt-body">
+                    <div class="cmt-meta">
+                        <strong th:text="${c.authorNickname}">익명</strong>
+                        <span>·</span>
+                        <span th:text="${#temporals.format(c.createdAt,'yyyy.MM.dd HH:mm')}">시간</span>
 
-                <div th:classappend="${c.deleted} ? 'muted' : ''"
-                     th:text="${c.content}">댓글 내용</div>
-
-                <!-- 대댓글 목록 -->
-                <div class="replies" th:if="${#lists.size(c.replies) > 0}">
-                    <div class="item" th:each="r : ${c.replies}" style="margin-left:24px;">
-                        <div class="meta">
-                            <strong th:text="${r.authorNickname}">익명</strong>
-                            <span class="divider">|</span>
-                            <span th:text="${#temporals.format(r.createdAt,'yyyy.MM.dd HH:mm')}"></span>
-
-                            <form th:if="${loginUserId != null and loginUserId == r.userId}"
-                                  th:action="@{|/comments/${r.id}/delete|}" method="post" style="margin-left:auto">
-                                <input type="hidden" name="postId" th:value="${post.id}"/>
-                                <button type="submit" class="btn ghost" onclick="return confirm('삭제하시겠어요?')">삭제</button>
-                            </form>
-                        </div>
-                        <div th:text="${r.content}">대댓글 내용</div>
+                        <!-- 내 댓글이면 삭제 -->
+                        <form th:if="${loginUserId != null and loginUserId == c.userId}"
+                              th:action="@{|/comments/${c.id}/delete|}" method="post" style="margin-left:auto">
+                            <input type="hidden" name="postId" th:value="${post.id}"/>
+                            <button type="submit" class="icon-btn" onclick="return confirm('삭제하시겠어요?')">🗑 삭제</button>
+                        </form>
                     </div>
-                </div>
 
-                <!-- 대댓글 작성 폼 -->
-                <form class="cmt-form" th:action="@{|/post/${post.id}/comments|}" method="post" style="margin-left:24px;">
-                    <textarea name="content" rows="2" placeholder="답글을 입력하세요" required></textarea>
-                    <input type="hidden" name="parentId" th:value="${c.id}"/>
+                    <div class="cmt-content" th:classappend="${c.deleted} ? 'muted' : ''"
+                         th:text="${c.content}">댓글 내용</div>
+
                     <div class="cmt-actions">
-                        <button type="submit" class="btn">답글 달기</button>
+                        <button class="icon-btn" type="button" th:attr="data-target=${'reply-'+c.id}" onclick="toggleReply(this)">↩ 답글</button>
+                        <button class="icon-btn" type="button">🚩 신고</button>
                     </div>
-                </form>
+
+                    <!-- 대댓글 스레드 -->
+                    <div class="cmt-thread" th:if="${#lists.size(c.replies) > 0}">
+                        <div class="cmt-reply" th:each="r : ${c.replies}">
+                            <div class="cmt-avatar" th:text="${#strings.substring(r.authorNickname,0,1)}">A</div>
+                            <div class="cmt-body">
+                                <div class="cmt-meta">
+                                    <strong th:text="${r.authorNickname}">익명</strong>
+                                    <span>·</span>
+                                    <span th:text="${#temporals.format(r.createdAt,'yyyy.MM.dd HH:mm')}"></span>
+
+                                    <form th:if="${loginUserId != null and loginUserId == r.userId}"
+                                          th:action="@{|/comments/${r.id}/delete|}" method="post" style="margin-left:auto">
+                                        <input type="hidden" name="postId" th:value="${post.id}"/>
+                                        <button type="submit" class="icon-btn" onclick="return confirm('삭제하시겠어요?')">🗑 삭제</button>
+                                    </form>
+                                </div>
+                                <div class="cmt-content" th:text="${r.content}">대댓글 내용</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 대댓글 작성폼 (토글) -->
+                    <div class="composer" th:id="${'reply-'+c.id}" style="display:none;">
+                        <form class="composer-inner" th:action="@{|/post/${post.id}/comments|}" method="post">
+                            <div class="cmt-avatar" th:text="${#strings.substring(session.nickname,0,1)}">N</div>
+                            <textarea name="content" rows="2" placeholder="답글을 입력하세요" required></textarea>
+                            <input type="hidden" name="parentId" th:value="${c.id}"/>
+                            <div class="composer-actions">
+                                <button type="submit" class="btn xs">등록</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             </div>
         </div>
 
+        <!-- 비어있을 때 -->
         <div class="cmt-list" th:if="${#lists.isEmpty(comments)}">
-            <div class="item" style="color:var(--muted)">아직 댓글이 없습니다.</div>
+            <div class="cmt-item">
+                <div class="cmt-avatar">🗨</div>
+                <div class="cmt-body muted">아직 댓글이 없습니다. 첫 댓글을 남겨보세요.</div>
+            </div>
         </div>
 
-        <!-- 루트 댓글 작성 -->
-        <form class="cmt-form" th:action="@{|/post/${post.id}/comments|}" method="post">
-            <textarea name="content" placeholder="댓글을 입력하세요" required></textarea>
-            <div class="cmt-actions">
-                <button type="submit" class="btn primary">등록</button>
-            </div>
-        </form>
+        <!-- 루트 댓글 작성(컴포저) -->
+        <div class="composer">
+            <form class="composer-inner" th:action="@{|/post/${post.id}/comments|}" method="post">
+                <div class="cmt-avatar" th:text="${session != null && session.nickname != null ? #strings.substring(session.nickname,0,1) : 'N'}">N</div>
+                <textarea name="content" placeholder="댓글을 입력하세요" required></textarea>
+                <div class="composer-actions">
+                    <button type="submit" class="btn primary">등록</button>
+                </div>
+            </form>
+        </div>
     </div>
+
 
 
 </div>
@@ -239,6 +289,20 @@
         var e=document.getElementById('flash-error'); if(e) show(e.textContent);
         var s=document.getElementById('flash-toast'); if(s) show(s.textContent);
     })();
+
+    function toggleReply(el){
+        var id = el.getAttribute('data-target');
+        var box = document.getElementById(id);
+        if(!box) return;
+        box.style.display = (box.style.display === 'none' || box.style.display === '') ? 'block' : 'none';
+        var ta = box.querySelector('textarea'); if(ta){ ta.focus(); }
+    }
+    // textarea 자동 리사이즈
+    document.addEventListener('input', function(e){
+        if(e.target.tagName === 'TEXTAREA'){
+            var t=e.target; t.style.height='auto'; t.style.height=(t.scrollHeight)+'px';
+        }
+    });
 </script>
 
 </body>
