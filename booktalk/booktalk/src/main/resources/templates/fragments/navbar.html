@@ -6,7 +6,7 @@
     <div class="spacer"></div>
 
     <!-- 로그인 안 된 경우 -->
-    <div th:if="${session.loginUser} == null" class="nav-actions">
+    <div th:if="${session.loginUser == null}" class="nav-actions">
         <a th:href="@{/login}" class="btn">로그인</a>
         <a th:href="@{/join}" class="btn outline">회원가입</a>
     </div>
@@ -20,11 +20,9 @@
         <a class="btn nav" th:href="@{/me}">내정보</a>
         <!-- ✅ 로그아웃: POST 요청 -->
         <form th:action="@{/logout}" method="post" style="display:inline;">
-            <button type="submit" class="btn nav">로그아웃</button>
-            <!-- ✅ 테마 전환 버튼 -->
-            <button type="button" class="btn nav" onclick="toggleTheme()">🌓 테마</button>
-
-        </form>
+               <button type="submit" class="btn nav">로그아웃</button>
+             </form>
+             <button type="button" class="btn nav" onclick="toggleTheme()">🌓 테마</button>
     </div>
 
 
