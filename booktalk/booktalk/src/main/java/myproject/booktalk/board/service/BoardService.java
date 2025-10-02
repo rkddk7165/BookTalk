@@ -1,11 +1,7 @@
 package myproject.booktalk.board.service;
 
-import lombok.RequiredArgsConstructor;
 import myproject.booktalk.board.Board;
-import myproject.booktalk.board.BoardRepository;
 import myproject.booktalk.board.BoardType;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;

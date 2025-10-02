@@ -3,7 +3,7 @@ package myproject.booktalk.post;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import myproject.booktalk.board.Board;
-import myproject.booktalk.board.BoardRepository;
+import myproject.booktalk.board.repository.BoardRepository;
 import myproject.booktalk.post.dto.*;
 import myproject.booktalk.postReaction.PostReactionRepository;
 import myproject.booktalk.user.Role;

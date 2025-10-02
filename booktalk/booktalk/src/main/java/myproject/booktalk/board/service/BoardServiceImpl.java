@@ -4,13 +4,11 @@ package myproject.booktalk.board.service;
 
 import lombok.RequiredArgsConstructor;
 import myproject.booktalk.board.Board;
-import myproject.booktalk.board.BoardRepository;
+import myproject.booktalk.board.repository.BoardRepository;
 import myproject.booktalk.board.BoardType;
 import myproject.booktalk.board.FixedBoardSlug;
 import myproject.booktalk.book.Book;
 import myproject.booktalk.book.BookRepository;
-import myproject.booktalk.book.service.BookService;
-import myproject.booktalk.user.UserRepository;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

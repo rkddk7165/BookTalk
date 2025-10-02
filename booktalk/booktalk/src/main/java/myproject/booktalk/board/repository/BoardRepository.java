@@ -1,6 +1,8 @@
-package myproject.booktalk.board;
+package myproject.booktalk.board.repository;
 
 import jakarta.persistence.LockModeType;
+import myproject.booktalk.board.Board;
+import myproject.booktalk.board.BoardType;
 import myproject.booktalk.board.dto.BookDiscussionBoardItem;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
@@ -12,7 +14,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface BoardRepository extends JpaRepository<Board, Long> {
+public interface BoardRepository extends JpaRepository<Board, Long>, BoardRepositoryCustom {
 
 
     // Book 기준 조회/존재여부

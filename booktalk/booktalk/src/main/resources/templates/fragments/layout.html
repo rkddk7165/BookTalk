@@ -1,0 +1,25 @@
+﻿<!-- src/main/resources/templates/fragments/layout.html -->
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${pageTitle} ?: 'BookTalk'">BookTalk</title>
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+    <style>
+        :root{ --bg:#f6f7fb; --txt:#222; }
+        body{ background:var(--bg); color:var(--txt); }
+        .wrap{ width:min(1180px,92vw); margin:0 auto; padding:28px 12px 56px; }
+    </style>
+</head>
+<body>
+<header th:replace="~{fragments/navbar :: navbar}"></header>
+
+<!-- 좌측 배너: 모든 페이지에서 항상 보이게 -->
+<div th:replace="~{fragments/left-rail :: leftRail}"></div>
+
+<!-- 본문을 끼워 넣는 자리 -->
+<main class="wrap" th:fragment="layout(content)">
+    <div th:replace="${content}"></div>
+</main>
+</body>
+</html>

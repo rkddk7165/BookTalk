@@ -239,22 +239,9 @@
 <!-- 상단바 -->
 <div th:replace="~{fragments/navbar :: navbar}"></div>
 
-<!-- 좌측 Top Writers 고정 패널: 기존 레이아웃 영향 없음 -->
-<aside class="home-sidewriters" th:if="${topWriters != null}">
-    <div class="tw-head">Top Writers</div>
-    <ol class="tw-list">
-        <li class="tw-item" th:each="tw, iStat : ${topWriters}">
-            <div class="tw-rank" th:text="${iStat.index + 1}">1</div>
-            <div class="tw-user">
-                <a th:href="@{|/users/${tw.userId}|}" th:text="${tw.nickname ?: '익명'}">닉네임</a>
-                <span class="tw-count" th:text="|${tw.postCount}|">0</span>
-            </div>
-        </li>
-        <li class="tw-item" th:if="${#lists.isEmpty(topWriters)}">
-            <div style="opacity:.8;">아직 집계할 데이터가 없습니다.</div>
-        </li>
-    </ol>
-</aside>
+<!-- 좌측 공통 배너 (모든 페이지에서 표시) -->
+<div th:replace="~{fragments/left-rail :: leftRail}"></div>
+
 
 
 <main class="wrap">

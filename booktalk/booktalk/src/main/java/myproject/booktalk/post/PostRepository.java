@@ -124,7 +124,5 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     List<TopWriterRow> findTopWriters(Pageable pageable);
 
 
-
-
-
+    boolean existsByBoardId(Long boardId);
 }

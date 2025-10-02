@@ -3,7 +3,9 @@ package myproject.booktalk.board;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import myproject.booktalk.BoardCreationRequest.BoardCreationRequestService;
-import myproject.booktalk.BoardCreationRequest.BoardCreationRequestServiceImpl;
+import myproject.booktalk.board.dto.BoardSearch;
+import myproject.booktalk.board.dto.BookDiscussionBoardItem;
+import myproject.booktalk.board.repository.BoardRepository;
 import myproject.booktalk.board.service.BoardQueryService;
 import myproject.booktalk.board.service.BoardService;
 import myproject.booktalk.book.Book;
@@ -16,6 +18,8 @@ import myproject.booktalk.post.dto.PostRow;
 import myproject.booktalk.user.User;
 import myproject.booktalk.user.session.SessionConst;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -129,9 +133,16 @@ public class BoardController {
     }
 
     @GetMapping("/book-discussion")
-    public String list(Model model) {
-        model.addAttribute("boards", boardQueryService.listBookDiscussionsSortedKo());
-        return "boards/book_discussion_list";
+    public String listBookDiscussionBoards(BoardSearch search,
+                                           @PageableDefault(size = 12, sort = "createdAt") Pageable pageable,
+                                           Model model) {
+
+        Page<BookDiscussionBoardItem> page = boardQueryService.searchBookDiscussion(search, pageable);
+
+        model.addAttribute("search", search);
+        model.addAttribute("page", page);
+        model.addAttribute("items", page.getContent());
+        return "boards/book_discussion_list"; // 타임리프 템플릿 이름
     }
 
     /**
