@@ -39,6 +39,7 @@ label { color: var(--muted); font-weight:600; font-size: 14px; }
 .welcome{
     line-height:1;          /* 높이 튀는 것 방지 */
     display:inline-block;
+    color:#fff
 }
 
 /* 네비게이션 버튼(작게, 세로 정렬 고정) */
